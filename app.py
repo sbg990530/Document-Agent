@@ -112,7 +112,7 @@ if st.button("🚀 리포트 생성", type="primary"):
                             st.metric(label="신뢰도", value=f"{score}%")
                         
                         st.write(f"{src['content'][:220]}...")
-                        st.markdown(f"[🔗 원문 보기]({src['url'])")
+                        st.markdown(f"[🔗 원문 보기]({src['url']})")
                         st.markdown("")
     else:
         st.warning("질문을 입력해주세요!")
