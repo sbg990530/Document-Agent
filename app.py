@@ -13,16 +13,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 캡처 화면과 동일한 하이엔드 다크 테마 커스텀 CSS
+# 🎨 가독성과 스타일이 완벽히 정돈된 다크 테마 커스텀 CSS
 st.markdown("""
     <style>
-    /* 전체 앱 배경을 깊은 네이비 다크톤으로 설정 */
+    /* 전체 앱 배경 */
     .stApp {
         background-color: #0b0f19;
         color: #f8fafc;
     }
     
-    /* 상단 내비게이션바 스타일 */
+    /* 상단 네비게이션바 스타일 */
     .nav-bar {
         display: flex;
         justify-content: space-between;
@@ -60,22 +60,35 @@ st.markdown("""
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
     
-    /* 카테고리 필터 캡슐 버튼 레이아웃용 */
     .filter-label {
         font-size: 0.9rem;
-        color: #9ca3af;
+        color: #94a3b8;
         margin-bottom: 8px;
         font-weight: 500;
     }
 
-    /* 리포트 출력 및 근거 카드 다크 테마 디자인 */
+    /* Streamlit 기본 버튼 스타일을 다크 테마에 맞게 조정 (버튼 글씨 가독성 확보) */
+    .stButton button {
+        background-color: #1f2937;
+        color: #ffffff;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .stButton button:hover {
+        background-color: #374151;
+        border-color: #60a5fa;
+        color: #ffffff;
+    }
+
+    /* 리포트 및 근거 카드 다크 테마 디자인 */
     .report-card-dark {
         background-color: #111827;
         border: 1px solid #1f2937;
         border-radius: 14px;
-        padding: 20px;
+        padding: 24px;
         margin-bottom: 16px;
-        color: #e2e8f0;
+        color: #f1f5f9;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
     .source-card-dark {
@@ -159,7 +172,7 @@ st.markdown("""
             <span>🛡️ DocuScout</span>
             <span class="badge-pro">AI Pro 3.1</span>
         </div>
-        <div style="color: #9ca3af; font-size: 0.9rem;">
+        <div style="color: #34d399; font-size: 0.9rem; font-weight: 500;">
             🟢 에이전트 준비완료
         </div>
     </div>
@@ -172,30 +185,30 @@ st.markdown("""
     <div class="search-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <span style="font-weight: 600; font-size: 1.05rem; color: #f8fafc;">🧭 AI 리서치 질의어 입력</span>
-            <span style="font-size: 0.85rem; color: #9ca3af;">실시간 웹 크롤링 + LLM 팩트체크 결합 모드</span>
+            <span style="font-size: 0.85rem; color: #94a3b8;">실시간 웹 크롤링 + LLM 팩트체크 결합 모드</span>
         </div>
 """, unsafe_allow_html=True)
 
 # 검색 입력창 및 실행 버튼
 col_s1, col_s2 = st.columns([5, 1])
 with col_s1:
-    user_query = st.text_input("질의어 입력", placeholder="예: 2026년 반도체 산업 전망 및 AI 칩 시장 경쟁 구도 분석", label_visibility="collapsed")
+    user_query = st.text_input("질의어 입력", placeholder="예: 2026년 4분기 SK하이닉스 주가 전망", label_visibility="collapsed")
 with col_s2:
     submit_btn = st.button("🚀 스카우트 실행", type="primary", use_container_width=True)
 
-# 카테고리 필터 캡슐 버튼 구현
+# 카테고리 필터 버튼 영역
 st.markdown("<div class='filter-label' style='margin-top: 15px;'>카테고리 필터:</div>", unsafe_allow_html=True)
-f_col1, f_col2, f_col3, f_col4, f_col5, f_col6 = st.columns([1, 1, 1, 1, 1, 2])
+f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
 with f_col1:
-    btn_all = st.button("전체 (All)", use_container_width=True)
+    st.button("전체 (All)", use_container_width=True)
 with f_col2:
-    btn_tech = st.button("테크 (Tech)", use_container_width=True)
+    st.button("테크 (Tech)", use_container_width=True)
 with f_col3:
-    btn_eco = st.button("경제/금융", use_container_width=True)
+    st.button("경제/금융", use_container_width=True)
 with f_col4:
-    btn_glo = st.button("글로벌 동향", use_container_width=True)
+    st.button("글로벌 동향", use_container_width=True)
 with f_col5:
-    btn_spo = st.button("스포츠/엔터", use_container_width=True)
+    st.button("스포츠/엔터", use_container_width=True)
 
 st.markdown("</div>", unsafe_allow_html=True) # search-container 닫기
 
@@ -204,7 +217,6 @@ st.markdown("</div>", unsafe_allow_html=True) # search-container 닫기
 # =====================================================================
 if submit_btn:
     if user_query:
-        # 생동감 넘치는 프로그래스 바 애니메이션
         progress_bar = st.progress(0)
         status_box = st.empty()
 
@@ -247,10 +259,12 @@ if submit_btn:
                     use_container_width=True
                 )
 
-            # 1. AI 리포트 본문 카드
-            st.markdown(f"""
+            # 1. AI 리포트 본문 카드 (마크다운 렌더링이 완벽하게 적용되도록 수정)
+            st.markdown("""
                 <div class="report-card-dark">
-                    {report_content.replace(chr(10), '<br>')}
+            """, unsafe_allow_html=True)
+            st.markdown(report_content)
+            st.markdown("""
                 </div>
             """, unsafe_allow_html=True)
 
