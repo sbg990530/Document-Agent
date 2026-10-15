@@ -108,7 +108,12 @@ def run_docuscout(user_query):
         query=auto_keyword,
         search_depth="advanced",
         max_results=5,
-        exclude_domains=["dcinside.com", "fmkorea.com", "namu.wiki"]
+        exclude_domains=[
+            "dcinside.com", "fmkorea.com", "ruliweb.com",
+            "cafe.naver.com", "blog.naver.com", "arca.live",
+            "kin.naver.com", "namu.wiki", "wikipedia.org", "facebook.com",
+            "threads.com"
+        ]
     )
     collected_sources = search_response.get('results', [])
 
