@@ -70,7 +70,7 @@ except Exception:
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
-llm = ChatOpenAI(model="gpt-5-nano", api_key=OPENAI_API_KEY, temperature=0)
+llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 
 # 사이드바 디자인
 with st.sidebar:
