@@ -1,4 +1,4 @@
-import os
+mport os
 from datetime import datetime
 import streamlit as st
 from tavily import TavilyClient
@@ -25,7 +25,7 @@ st.markdown("""
     /* 상단 타이틀 히어로 배너 */
     .hero-box {
         padding: 2.5rem;
-        background: linear-gradient(135deg, #0f172a 1e293b 0%, #1e293b 100%);
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         color: white;
         border-radius: 16px;
         margin-bottom: 2rem;
@@ -41,17 +41,6 @@ st.markdown("""
         font-size: 1.05rem;
         color: #cbd5e1;
         line-height: 1.5;
-    }
-
-    /* AI 리포트 출력 박스 */
-    .report-container {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
-        color: #1e293b;
     }
 
     /* 근거 카드 디자인 스타일 */
@@ -168,13 +157,10 @@ if submit_btn:
             else:
                 st.success(f"🔍 자동 추출된 검색어: **{auto_keyword}** (신뢰도 높은 공식 소스 분석 완료)")
                 
-                # 1. AI 종합 인사이트 리포트 박스
+                # 1. AI 종합 인사이트 리포트 (Streamlit 네이티브 컨테이너 및 마크다운 적용)
                 st.markdown("### 💡 AI 종합 인사이트 리포트")
-                st.markdown(f"""
-                    <div class="report-container">
-                        {report_content.replace(chr(10), '<br>')}
-                    </div>
-                """, unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown(report_content)
                 
                 # 2. 추천 후속 심층 리서치 질문
                 st.markdown("### 💬 추천 후속 심층 리서치 질문")
