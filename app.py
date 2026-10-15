@@ -29,19 +29,20 @@ llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 def run_docuscout(user_query):
     current_date_str = datetime.now().strftime("%Y년 %m월")
 
-    # 1. 키워드 생성 (사용자 질문 의도 파악)
+    # 1. 키워드 생성
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 핵심 검색 키워드 2~3개를 추출하여 검색어만 출력하세요. 예: 'SK하이닉스 HBM 전망'"),
+        ("system", "사용자 질문에서 핵심 명사 키워드 2~3개만 조사 없이 조합하여 검색어만 출력하세요."),
         ("user", "현재 시점: {current_date}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"current_date": current_date_str, "query": user_query}).content.strip()
 
-    # 2. Tavily 검색 (가장 정확하고 관련성 높은 결과를 위해 일반 advanced 검색 활용)
+    # 2. Tavily 검색 (신뢰도 낮은 커뮤니티 제외)
     search_response = tavily_client.search(
         query=auto_keyword,
         search_depth="advanced",
+        topic="news",
         max_results=5,
-        exclude_domains=["dcinside.com", "fmkorea.com", "namu.wiki"] # 꼭 필요한 핵심 차단만 유지
+        exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "cafe.naver.com", "blog.naver.com", "arca.live"]
     )
     collected_sources = search_response.get('results', [])
 
@@ -78,7 +79,7 @@ user_query = st.text_input("분석 요청 질문 입력", placeholder="예: 요�
 
 if st.button("🚀 리포트 생성", type="primary"):
     if user_query:
-        with st.spinner("🤖 에이전트가 관련 정보를 수집하고 정밀 분석 중입니다... 잠시만 기다려주세요!"):
+        with st.spinner("🤖 에이전트가 실시간 정보를 수집하고 분석 중입니다... 잠시만 기다려주세요!"):
             auto_keyword, report_content, followup_content, sources = run_docuscout(user_query)
             
             if sources is None:
@@ -110,7 +111,7 @@ if st.button("🚀 리포트 생성", type="primary"):
                             st.metric(label="신뢰도", value=f"{score}%")
                         
                         st.write(f"{src['content'][:220]}...")
-                        st.markdown(f"[🔗 원문 보기]({src['url']})")
+                        st.markdown(f"[🔗 원문 보기]({src['url'])")
                         st.markdown("")
     else:
         st.warning("질문을 입력해주세요!")
