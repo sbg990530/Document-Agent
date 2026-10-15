@@ -5,7 +5,7 @@ from tavily import TavilyClient
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-# 🌐 웹페이지 기본 설정 (Wide 레이아웃 적용)
+# 🌐 웹페이지 기본 설정 (Wide 레이아웃)
 st.set_page_config(
     page_title="DocuScout | AI Intelligence Agent",
     page_icon="🕵️‍♂️",
@@ -13,22 +13,23 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 🎨 커스텀 CSS 디자인 적용 (카드 UI, 그림자, 세련된 폰트 및 여백)
+# 🎨 고급 커스텀 CSS (배경 그라데이션, 세련된 카드 UI, 그림자 효과)
 st.markdown("""
     <style>
-    /* 전체 배경 및 폰트 감성 */
-    .main {
-        background-color: #f8fafc;
+    /* 전체 웹페이지 배경에 은은한 그라데이션 적용 */
+    .stApp {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        background-attachment: fixed;
     }
     
-    /* 상단 타이틀 배너 카드 */
+    /* 상단 타이틀 히어로 배너 */
     .hero-box {
         padding: 2.5rem;
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        background: linear-gradient(135deg, #0f172a 1e293b 0%, #1e293b 100%);
         color: white;
         border-radius: 16px;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
     }
     .hero-title {
         font-size: 2.2rem;
@@ -38,14 +39,25 @@ st.markdown("""
     }
     .hero-subtitle {
         font-size: 1.05rem;
-        color: #94a3b8;
+        color: #cbd5e1;
         line-height: 1.5;
+    }
+
+    /* AI 리포트 출력 박스 */
+    .report-container {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        color: #1e293b;
     }
 
     /* 근거 카드 디자인 스타일 */
     .source-card {
         background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 12px;
         padding: 1.25rem;
         margin-bottom: 1rem;
@@ -55,17 +67,7 @@ st.markdown("""
     .source-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border-color: #cbd5e1;
-    }
-    
-    /* 리포트 섹션 컨테이너 */
-    .report-container {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
+        border-color: #94a3b8;
     }
     </style>
 """, unsafe_allow_html=True)
