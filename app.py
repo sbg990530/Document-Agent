@@ -14,15 +14,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 밋밋함을 없애고 트렌디한 네온 오로라 글래스모피즘을 극대화한 CSS
+# 🎨 칙칙한 어두운색을 완전히 뺀 화사하고 세련된 '라이트 아로라' 테마 CSS
 st.markdown("""
     <style>
-    /* 전체 배경: 화사한 네온 아로라 오로라 그라데이션 */
+    /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
     .stApp {
-        background: radial-gradient(circle at 15% 15%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
-                    radial-gradient(circle at 85% 85%, rgba(147, 51, 234, 0.12) 0%, transparent 40%),
-                    linear-gradient(135deg, #0f172a 0%, #090d16 100%);
-        color: #f8fafc;
+        background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+                    linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        color: #1e293b;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
@@ -31,13 +31,13 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(30, 41, 59, 0.7);
+        background: rgba(255, 255, 255, 0.85);
         padding: 14px 28px;
         border-radius: 20px;
-        border: 1px solid rgba(129, 140, 248, 0.35);
+        border: 1px solid rgba(203, 213, 225, 0.6);
         margin-bottom: 24px;
         backdrop-filter: blur(20px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
     .brand-logo {
         display: flex;
@@ -45,11 +45,11 @@ st.markdown("""
         gap: 12px;
         font-size: 1.3rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #0f172a;
         letter-spacing: -0.5px;
     }
     .brand-icon {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         width: 38px;
         height: 38px;
         border-radius: 12px;
@@ -57,12 +57,13 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         font-size: 1.1rem;
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
     }
     .status-chip {
-        background: rgba(16, 185, 129, 0.15);
-        color: #34d399;
-        border: 1px solid rgba(52, 211, 153, 0.4);
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
         padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.8rem;
@@ -70,23 +71,22 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
     }
 
-    /* 탭 스타일 고급화 */
+    /* 탭 스타일 고급화 (라이트톤) */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
-        background-color: rgba(30, 41, 59, 0.5);
+        background-color: rgba(255, 255, 255, 0.7);
         padding: 6px;
         border-radius: 16px;
-        border: 1px solid rgba(129, 140, 248, 0.25);
+        border: 1px solid rgba(203, 213, 225, 0.6);
         backdrop-filter: blur(12px);
     }
     .stTabs [data-baseweb="tab"] {
         height: 44px;
         background-color: transparent;
         border-radius: 12px;
-        color: #94a3b8;
+        color: #64748b;
         font-weight: 600;
         font-size: 0.95rem;
         padding: 0 24px;
@@ -95,39 +95,38 @@ st.markdown("""
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
 
-    /* 버튼 스타일 (네온 인디고 그라데이션) */
+    /* 버튼 스타일 (선명한 인디고 블루) */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        border: 1px solid rgba(129, 140, 248, 0.5) !important;
+        border: 1px solid rgba(99, 102, 241, 0.4) !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
         font-size: 0.92rem !important;
         height: 44px !important;
         transition: all 0.25s ease !important;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
     }
     div.stButton > button:hover, 
     div.stFormSubmitButton > button:hover, 
     div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
-        border-color: #a5b4fc !important;
-        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
-        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.7) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%) !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 (글래스모피즘 + 호버 네온 글로우) */
+    /* 3열 출처 카드 (화사하고 깨끗한 라이트 글래스 카드) */
     .source-card-modern {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1px solid rgba(129, 140, 248, 0.25);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(203, 213, 225, 0.7);
         border-left: 4px solid #6366f1;
         border-radius: 16px;
         padding: 18px 20px;
@@ -136,19 +135,19 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
         backdrop-filter: blur(12px);
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .source-card-modern:hover {
-        transform: translateY(-5px);
-        border-color: #818cf8;
-        border-left: 4px solid #818cf8;
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.45);
-        background: linear-gradient(145deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
+        transform: translateY(-4px);
+        border-color: #6366f1;
+        border-left: 4px solid #4f46e5;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+        background: #ffffff;
     }
     .source-card-modern p {
-        color: #cbd5e1;
+        color: #475569;
         font-size: 0.83rem;
         line-height: 1.45;
         margin: 4px 0;
@@ -158,14 +157,13 @@ st.markdown("""
         overflow: hidden;
     }
     .score-chip {
-        background-color: rgba(16, 185, 129, 0.2);
-        color: #34d399;
-        border: 1px solid rgba(52, 211, 153, 0.4);
+        background-color: rgba(16, 185, 129, 0.12);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
         padding: 2px 10px;
         border-radius: 20px;
         font-size: 0.72rem;
         font-weight: 700;
-        box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -284,7 +282,7 @@ st.markdown("""
         <div class="brand-logo">
             <div class="brand-icon">🕵️‍♂️</div>
             <span>DocuScout</span>
-            <span style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe; border: 1px solid rgba(199, 210, 254, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1</span>
+            <span style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1</span>
         </div>
         <div class="status-chip">
             <span>●</span> Live Agent Ready
@@ -296,8 +294,8 @@ st.markdown("""
 # 2. 검색 카드 & st.form
 # =====================================================================
 st.markdown("""
-    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.25);">
-        <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
+    <div style="background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(203, 213, 225, 0.7); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
+        <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
 """, unsafe_allow_html=True)
 
 with st.form(key="search_form"):
@@ -356,7 +354,7 @@ if st.session_state.report_data:
 
             st.markdown("#### 📈 신뢰도 요약")
             with st.container(border=True):
-                st.markdown(f"##### 평균 신뢰도: <span style='color:#34d399; font-weight:bold;'>{dynamic_avg_score}.1%</span>", unsafe_allow_html=True)
+                st.markdown(f"##### 평균 신뢰도: <span style='color:#059669; font-weight:bold;'>{dynamic_avg_score}.1%</span>", unsafe_allow_html=True)
                 st.progress(dynamic_avg_score)
                 st.caption(f"• 학술/공식 보고서 비중: {academic_ratio}%")
                 st.caption(f"• IT/경제 전문 언론사 비중: {news_ratio}%")
@@ -386,12 +384,12 @@ if st.session_state.report_data:
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div style="display: flex; align-items: center; gap: 6px; max-width: 68%;">
                                             <span style="background-color: #6366f1; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">#{i+j+1}</span>
-                                            <span style="font-weight: 600; color: #f8fafc; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+                                            <span style="font-weight: 600; color: #0f172a; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
                                         </div>
                                         <span class="score-chip">신뢰도 {score}%</span>
                                     </div>
                                     <p>{clean_content}</p>
-                                    <div style="font-size:0.7rem; color:#94a3b8;">Verified Fact Source</div>
+                                    <div style="font-size:0.7rem; color:#64748b;">Verified Fact Source</div>
                                 </div>
                             """, unsafe_allow_html=True)
                             
