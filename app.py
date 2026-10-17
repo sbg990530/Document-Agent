@@ -14,9 +14,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 완전한 일체형 검색 패널 디자인이 적용된 CSS
+# 🎨 검색 입력 영역 단일 통합 및 화사한 라이트 테마 CSS
 st.markdown("""
     <style>
+    /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
     .stApp {
         background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
                     radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
@@ -34,7 +35,7 @@ st.markdown("""
         padding: 14px 28px;
         border-radius: 20px;
         border: 1px solid rgba(203, 213, 225, 0.6);
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         backdrop-filter: blur(20px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
@@ -71,14 +72,14 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 🌟 완벽한 일체형 검색 패널 */
-    .search-panel-box {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(203, 213, 225, 0.8);
-        border-radius: 24px;
-        padding: 26px 30px;
-        margin-bottom: 24px;
-        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.08);
+    /* 🌟 st.form 박스 스타일 하나로 깔끔하게 단일화 */
+    [data-testid="stForm"] {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(203, 213, 225, 0.8) !important;
+        border-radius: 20px !important;
+        padding: 20px 24px !important;
+        margin-bottom: 24px !important;
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
     /* 탭 스타일 고급화 */
@@ -104,7 +105,7 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
 
-    /* 버튼 스타일 */
+    /* 버튼 스타일 및 가시성 강제 고정 */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
@@ -116,6 +117,7 @@ st.markdown("""
         font-weight: 700 !important;
         font-size: 0.92rem !important;
         height: 44px !important;
+        transition: all 0.25s ease !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
     }
     div.stButton > button:hover, 
@@ -287,12 +289,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 완벽한 일체형 검색 바 패널 (이중 박스 완전 제거)
+# 2. 하나의 박스 안으로 타이틀+입력창+버튼을 완벽히 통합한 st.form
 # =====================================================================
-st.markdown('<div class="search-panel-box">', unsafe_allow_html=True)
-st.markdown('<div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
-
 with st.form(key="search_form"):
+    st.markdown('<div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
+    
     col_s1, col_s2 = st.columns([5, 1.2])
     with col_s1:
         user_query = st.text_input(
@@ -303,8 +304,6 @@ with st.form(key="search_form"):
         )
     with col_s2:
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 if submit_btn:
     if user_query:
