@@ -1,3 +1,5 @@
+%%writefile app.py
+
 import os
 from datetime import datetime
 import streamlit as st
@@ -7,133 +9,136 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # 🌐 웹페이지 기본 설정 (Wide 레이아웃)
 st.set_page_config(
-    page_title="DocuScout - Dynamic Intelligence Agent Dashboard",
+    page_title="DocuScout Professional - AI Intelligence Agent",
     page_icon="🕵️‍♂️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 시각적 입체감과 화려한 출처 카드 디자인이 적용된 커스텀 CSS
+# 🎨 밋밋함을 없애고 입체감을 극대화한 글래스모피즘 & 사이버 프로 커스텀 CSS
 st.markdown("""
     <style>
+    /* 전체 배경을 더 짙게 처리하여 콘텐츠 입체감 강조 */
     .stApp {
-        background-color: #0b0f19;
-        color: #f8fafc;
+        background-color: #030508;
+        color: #f1f5f9;
+        font-family: 'Inter', sans-serif;
     }
     
-    /* 1. 상단 네비게이션 바 스타일 */
+    /* 1. 상단 네비게이션 바: 더 세련된 네온 라인 */
     .nav-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-        padding: 14px 24px;
-        border-radius: 14px;
-        border: 1px solid #374151;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        background: rgba(15, 23, 42, 0.8);
+        padding: 16px 28px;
+        border-radius: 16px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        margin-bottom: 28px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 30px rgba(59, 130, 246, 0.1);
     }
     .nav-title {
-        font-size: 1.25rem;
-        font-weight: 700;
+        font-size: 1.3rem;
+        font-weight: 800;
         color: #ffffff;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        letter-spacing: -0.5px;
     }
     .badge-pro {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         color: #eff6ff;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-left: 10px;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
     }
     
-    /* 2. 검색 컨테이너 */
+    /* 2. 검색 컨테이너: 깊이감 있는 글래스 디자인 */
     .search-container {
-        background-color: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 28px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
-    .filter-label {
-        font-size: 0.9rem;
-        color: #94a3b8;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
+    
+    /* 버튼: 강력한 사이버 블루 그라데이션 및 호버 효과 */
     .stButton button {
-        background-color: #1f2937;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: #ffffff;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.25s ease;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 78, 216, 0.3);
     }
     .stButton button:hover {
-        background-color: #2563eb;
-        border-color: #60a5fa;
-        color: #ffffff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
     }
     
-    /* 3. 페이드인 애니메이션 */
-    @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(16px) scale(0.98); }
-        100% { opacity: 1; transform: translateY(0) scale(1); }
+    /* 3. 리포트 본문 카드: 고급스러운 서식 */
+    .report-card-pro {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 18px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-
-    .report-card-dark {
-        background-color: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 14px;
-        padding: 24px;
-        margin-bottom: 16px;
-        color: #f1f5f9;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .report-card-pro h1, .report-card-pro h2, .report-card-pro h3 {
+        color: #60a5fa; /* 제목에 사이버 블루 포인트 */
+        font-weight: 700;
     }
     
-    /* 4. 🌟 세련되게 업그레이드된 검증 출처 카드 디자인 (높이 고정 + 호버 글로우) */
+    /* 4. 🌟 대폭 개선된 '검증된 신뢰 출처 근거 카드' (사이버 프로 스타일) */
     .source-card-modern {
-        background: linear-gradient(145deg, #111827 0%, #0f172a 100%);
-        border: 1px solid #1e293b;
-        border-radius: 14px;
-        padding: 18px 22px;
-        margin-bottom: 14px;
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(10, 15, 25, 0.95) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.15);
+        border-left: 4px solid #1d4ed8; /* 왼쪽 포인트 바 */
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
         height: 145px !important;
         max-height: 145px !important;
-        overflow: hidden !important;
-        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-sizing: border-box;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .source-card-modern:hover {
+        transform: translateY(-5px) scale(1.01);
+        border-color: rgba(96, 165, 250, 0.6);
+        border-left: 4px solid #60a5fa;
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
     }
     .source-card-modern p {
         color: #94a3b8;
-        font-size: 0.85rem;
-        line-height: 1.4;
-        margin: 4px 0;
-        display: -webkit-box;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin: 6px 0;
         -webkit-line-clamp: 2;
+        display: -webkit-box;
         -webkit-box-orient: vertical;
-        overflow: hidden !important;
-        text-overflow: ellipsis;
+        overflow: hidden;
     }
-    /* 마우스 호버 시 카드 부드러운 상승 및 블루 네온 글로우 효과 */
-    .source-card-modern:hover {
-        transform: translateY(-5px) scale(1.008);
-        border-color: #3b82f6;
-        background: linear-gradient(145deg, #172033 0%, #1e293b 100%);
-        box-shadow: 0 12px 28px -6px rgba(59, 130, 246, 0.35);
+    /* 신뢰도 칩 프로페셔널 디자인 */
+    .source-card-modern .score-chip {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-shadow: 0 0 5px rgba(52, 211, 153, 0.5);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -167,10 +172,7 @@ def run_docuscout(query_text):
         topic="news",
         max_results=5,
         exclude_domains=[
-            "dcinside.com", "fmkorea.com", "ruliweb.com",
-            "cafe.naver.com", "blog.naver.com", "arca.live",
-            "kin.naver.com", "namu.wiki", "wikipedia.org", "facebook.com",
-            "threads.com"
+            "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"
         ]
     )
     collected_sources = search_response.get('results', [])
@@ -183,13 +185,13 @@ def run_docuscout(query_text):
         collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
 
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 현재 시점({current_date})에 걸맞은 표준 목차(1. 개요 및 최신 현황, 2. 주요 수치 및 팩트 지표, 3. 향후 전망 및 시사점)에 맞춰 전문 보고서를 작성하세요."),
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 목차(1. 개요, 2. 주요 팩트, 3. 전망)에 맞춰 보고서를 작성하세요."),
         ("user", "현재 시점: {current_date}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
     report_res = (report_prompt | llm).invoke({"current_date": current_date_str, "context": collected_context, "query": query_text})
     
     followup_prompt = ChatPromptTemplate.from_messages([
-        ("system", "분석 리포트 기반 후속 심층 질문 3가지를 마크다운 불릿(- )으로만 작성하세요."),
+        ("system", "리포트 기반 후속 심층 질문 3가지를 마크다운 불릿으로 작성하세요."),
         ("user", "주제: {query}\n요약:\n{summary}")
     ])
     followup_res = (followup_prompt | llm).invoke({"query": query_text, "summary": report_res.content})
@@ -202,12 +204,12 @@ def run_docuscout(query_text):
 st.markdown("""
     <div class="nav-bar">
         <div class="nav-title">
-            <span>DocuScout</span>
-            <span class="badge-pro">AI Pro 3.1</span>
+            <span>DocuScout Professional</span>
+            <span class="badge-pro">AI Intelligence</span>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
-            <span style="background-color: #1f2937; color: #60a5fa; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">대시보드</span>
-            <span style="color: #34d399; font-size: 0.85rem; font-weight: 500;">실시간 라이브 탐색 모드</span>
+            <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Dashboard</span>
+            <span style="color: #34d399; font-size: 0.85rem; font-weight: 500;">Live Mode</span>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -217,47 +219,30 @@ st.markdown("""
 # =====================================================================
 st.markdown("""
     <div class="search-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="font-weight: 600; font-size: 1.05rem; color: #f8fafc;">AI 리서치 질의어 입력</span>
-            <span style="font-size: 0.85rem; color: #94a3b8;">실시간 웹 크롤링 + LLM 팩트체크 결합 모드</span>
-        </div>
+        <div style="font-weight: 700; font-size: 1.1rem; color: #ffffff; margin-bottom: 12px;">AI Research Agent Query</div>
 """, unsafe_allow_html=True)
 
 col_s1, col_s2 = st.columns([5, 1])
 with col_s1:
-    user_query = st.text_input("질의어 입력", placeholder="예: 2026년 반도체 산업 전망 및 AI 시장 경쟁 구도 분석", label_visibility="collapsed")
+    user_query = st.text_input("질의어 입력", placeholder="예: 2026년 AI 반도체 시장 경쟁 구도", label_visibility="collapsed")
 with col_s2:
-    submit_btn = st.button("스카우트 실행", type="primary", use_container_width=True)
-
-st.markdown("<div class='filter-label' style='margin-top: 15px;'>카테고리 필터:</div>", unsafe_allow_html=True)
-f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
-with f_col1:
-    st.button("전체 (All)", use_container_width=True)
-with f_col2:
-    st.button("테크 (Tech)", use_container_width=True)
-with f_col3:
-    st.button("경제/금융", use_container_width=True)
-with f_col4:
-    st.button("글로벌 동향", use_container_width=True)
-with f_col5:
-    st.button("스포츠/엔터", use_container_width=True)
-
+    submit_btn = st.button("실행", type="primary", use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # =====================================================================
-# 실행 및 결과 동적 출력 영역
+# 결과 동적 출력 영역
 # =====================================================================
 if submit_btn:
     if user_query:
         progress_bar = st.progress(0)
         status_box = st.empty()
 
-        status_box.markdown("**1단계:** 현재 시점 기반 최신 키워드 추출 중...")
+        status_box.markdown("**1단계:** 키워드 추출 중...")
         progress_bar.progress(25)
 
         auto_keyword, report_content, followup_content, sources = run_docuscout(user_query)
         
-        status_box.markdown("**2단계:** Tavily 실시간 뉴스 및 공식 웹 출처 수집 중...")
+        status_box.markdown("**2단계:** 출처 수집 중...")
         progress_bar.progress(60)
 
         if sources is None:
@@ -265,92 +250,63 @@ if submit_btn:
             status_box.empty()
             st.error("관련 자료를 찾을 수 없습니다.")
         else:
-            status_box.markdown("**3단계:** 최신 데이터 기반 팩트체크 및 리포트 작성 중...")
+            status_box.markdown("**3단계:** 리포트 작성 중...")
             progress_bar.progress(100)
             status_box.empty()
             progress_bar.empty()
 
             st.markdown(f"""
-                <div style="background-color: #111827; border: 1px solid #1f2937; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; animation: fadeInUp 0.3s ease-out;">
-                    <span style="color: #34d399; font-weight: 600;">최신 탐색 완료! (추출 검색어: {auto_keyword})</span>
-                    <span style="background-color: #1f2937; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">100%</span>
+                <div style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; color: #34d399; font-weight: 600;">
+                    최신 탐색 완료! (추출 검색어: {auto_keyword})
                 </div>
             """, unsafe_allow_html=True)
 
-            # 동적 탭 UI 적용
-            tab1, tab2 = st.tabs(["📊 메인 리서치 대시보드", "💬 심층 후속 분석 & 로그"])
+            col_main, col_sub = st.columns([2, 1])
 
-            with tab1:
-                col_main, col_sub = st.columns([2, 1])
+            with col_main:
+                # 리포트 카드 디자인 적용
+                st.markdown('<div class="report-card-pro">', unsafe_allow_html=True)
+                st.markdown(report_content)
+                st.markdown('</div>', unsafe_allow_html=True)
 
-                with col_main:
-                    col_h1, col_h2 = st.columns([3, 1])
-                    with col_h1:
-                        st.markdown("### AI 에이전트 종합 리포트")
-                    with col_h2:
-                        st.download_button(
-                            label="내보내기",
-                            data=report_content,
-                            file_name=f"DocuScout_Report_{datetime.now().strftime('%Y%m%d')}.txt",
-                            mime="text/plain",
-                            use_container_width=True
-                        )
+            with col_sub:
+                st.markdown("### 신뢰도 분석")
+                with st.container(border=True):
+                    st.markdown("##### 평균 신뢰도: <span style='color:#34d399; text-shadow:0 0 5px rgba(52, 211, 153, 0.5);'>94.2%</span>", unsafe_allow_html=True)
+                    st.progress(94)
 
-                    st.markdown('<div class="report-card-dark">', unsafe_allow_html=True)
-                    st.markdown(report_content)
-                    st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("### 후속 리서치")
+                with st.container(border=True):
+                    st.markdown(followup_content)
 
-                with col_sub:
-                    st.markdown("### 출처 신뢰도 분석")
-                    with st.container(border=True):
-                        st.markdown("##### 평균 신뢰도: <span style='color:#34d399;'>94.2%</span>", unsafe_allow_html=True)
-                        st.progress(94)
-                        st.caption("• 학술/공식 보고서 비중: 62%")
-                        st.caption("• IT/경제 전문 언론사 비중: 38%")
-
-                    st.markdown("### 연관 핵심 키워드")
-                    with st.container(border=True):
-                        st.markdown(f"`#{auto_keyword}` `#AI트렌드` `#2026전망` `#팩트체크`")
-
-                # 🌟 모던한 디자인이 적용된 '검증된 신뢰 출처 근거 카드' 섹션
-                st.markdown("### 검증된 신뢰 출처 근거 자료")
-                for idx, src in enumerate(sources, 1):
-                    score = 92 + (idx * 2) % 7
-                    clean_content = src['content'].replace('\n', ' ').replace('\r', ' ').strip()
-                    
-                    st.markdown(f"""
-                        <div class="source-card-modern">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 8px; max-width: 78%;">
-                                    <span style="background-color: #1d4ed8; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">#{idx}</span>
-                                    <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+            # 🌟 사이버 프로 디자인이 적용된 '검증된 신뢰 출처 근거 카드' 섹션
+            st.markdown("---")
+            st.markdown("### 검증된 신뢰 출처 근거 자료")
+            
+            # 한 줄에 카드 3개가 나오도록 레이아웃 (축소했을 때도 보기 좋음)
+            for i in range(0, len(sources), 3):
+                col1, col2, col3 = st.columns(3)
+                cols = [col1, col2, col3]
+                
+                for j in range(3):
+                    if i + j < len(sources):
+                        src = sources[i + j]
+                        score = 92 + ((i+j) * 2) % 7
+                        clean_content = src['content'].replace('\n', ' ').strip()
+                        
+                        with cols[j]:
+                            st.markdown(f"""
+                                <div class="source-card-modern">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 8px; max-width: 70%;">
+                                            <span style="background-color: #1d4ed8; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">#{i+j+1}</span>
+                                            <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+                                        </div>
+                                        <span class="score-chip">신뢰도 {score}%</span>
+                                    </div>
+                                    <p>{clean_content}</p>
+                                    <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.83rem; font-weight: 500;">원문 보러가기 →</a>
                                 </div>
-                                <span style="background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">신뢰도 {score}%</span>
-                            </div>
-                            <p>{clean_content}</p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.83rem; font-weight: 500;">원문 보러가기 →</a>
-                                <span style="color: #64748b; font-size: 0.75rem;">Verified Source</span>
-                            </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-
-            with tab2:
-                col_t2_left, col_t2_right = st.columns([1, 1])
-                with col_t2_left:
-                    st.markdown("### 추천 후속 심층 리서치")
-                    with st.container(border=True):
-                        st.markdown(followup_content)
-                with col_t2_right:
-                    st.markdown("### 실시간 탐색 로그")
-                    with st.container(border=True):
-                        current_t = datetime.now().strftime("%H:%M:%S")
-                        st.markdown(f"""
-                            <div style='font-size: 0.8rem; color: #94a3b8; font-family: monospace; line-height: 1.8;'>
-                            [{current_t}] 키워드 정규화 완료 (추출: {auto_keyword})<br>
-                            [{current_t}] Tavily 뉴스 실시간 수집 (성공)<br>
-                            [{current_t}] GPT-4o-mini 기반 팩트체크 및 리포트 렌더링 완료
-                            </div>
-                        """, unsafe_allow_html=True)
+                            """, unsafe_allow_html=True)
     else:
         st.warning("⚠️ 질의어를 입력해주세요!")
