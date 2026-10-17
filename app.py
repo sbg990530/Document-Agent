@@ -14,104 +14,112 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 UI/UX 및 버튼 가시성 CSS
+# 🎨 칙칙함을 완전히 없앤 화사하고 세련된 '아로라 글래스모피즘' 테마 CSS
 st.markdown("""
     <style>
+    /* 전체 배경: 화사하고 깊이감 있는 프리미엄 오로라 블루 그라데이션 */
     .stApp {
-        background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+        background: radial-gradient(circle at 50% -20%, #312e81 0%, #1e1b4b 40%, #0f172a 100%);
         color: #f8fafc;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* 상단 네비바 */
+    /* 상단 네비바 (더욱 선명하고 화사한 글래스 스타일) */
     .top-navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(30, 41, 59, 0.7);
-        padding: 12px 24px;
-        border-radius: 16px;
-        border: 1px solid rgba(96, 165, 250, 0.25);
-        margin-bottom: 20px;
+        background: rgba(30, 41, 59, 0.65);
+        padding: 14px 26px;
+        border-radius: 18px;
+        border: 1px solid rgba(129, 140, 248, 0.3);
+        margin-bottom: 24px;
         backdrop-filter: blur(16px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
     .brand-logo {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 1.2rem;
+        gap: 12px;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #ffffff;
     }
     .brand-icon {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
-        box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+        font-size: 1.1rem;
+        box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
     }
     .status-chip {
         background: rgba(16, 185, 129, 0.2);
         color: #34d399;
         border: 1px solid rgba(52, 211, 153, 0.4);
-        padding: 4px 12px;
+        padding: 5px 14px;
         border-radius: 20px;
-        font-size: 0.78rem;
+        font-size: 0.8rem;
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
     }
 
-    /* 버튼 글자 가시성 및 디자인 강제 고정 */
+    /* 🌟 모든 버튼 스타일 (선명한 인디고-블루 그라데이션 및 확실한 가시성) */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        border: 1px solid rgba(96, 165, 250, 0.4) !important;
-        border-radius: 10px !important;
+        border: 1px solid rgba(129, 140, 248, 0.4) !important;
+        border-radius: 12px !important;
         font-weight: 700 !important;
-        font-size: 0.9rem !important;
-        height: 42px !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
+        font-size: 0.92rem !important;
+        height: 44px !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
     }
     
     div.stButton > button:hover, 
     div.stFormSubmitButton > button:hover, 
     div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
-        border-color: #60a5fa !important;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.55) !important;
+        border-color: #818cf8 !important;
+        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%) !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 스타일 */
+    /* 3열 출처 카드 스타일 (화사한 테두리 광채 효과) */
     .source-card-modern {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-        border: 1px solid rgba(96, 165, 250, 0.25);
-        border-left: 4px solid #3b82f6;
-        border-radius: 14px;
-        padding: 16px 18px;
-        margin-bottom: 10px;
-        height: 165px !important;
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.25);
+        border-left: 4px solid #6366f1;
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        height: 170px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
+    }
+    .source-card-modern:hover {
+        transform: translateY(-4px);
+        border-color: #818cf8;
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
     }
     .source-card-modern p {
         color: #cbd5e1;
-        font-size: 0.82rem;
-        line-height: 1.4;
+        font-size: 0.83rem;
+        line-height: 1.45;
         margin: 4px 0;
         -webkit-line-clamp: 3;
         display: -webkit-box;
@@ -122,9 +130,9 @@ st.markdown("""
         background-color: rgba(16, 185, 129, 0.2);
         color: #34d399;
         border: 1px solid rgba(52, 211, 153, 0.4);
-        padding: 2px 8px;
+        padding: 2px 9px;
         border-radius: 20px;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 700;
     }
     </style>
@@ -244,7 +252,7 @@ st.markdown("""
         <div class="brand-logo">
             <div class="brand-icon">🕵️‍♂️</div>
             <span>DocuScout</span>
-            <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(147, 197, 253, 0.4); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1</span>
+            <span style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe; border: 1px solid rgba(199, 210, 254, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1</span>
         </div>
         <div class="status-chip">
             <span>●</span> Live Agent Ready
@@ -253,11 +261,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 검색 카드 & st.form (카테고리 필터 제거 완료)
+# 2. 검색 카드 & st.form
 # =====================================================================
 st.markdown("""
-    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 22px 26px; margin-bottom: 20px;">
-        <div style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
+    <div style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
 """, unsafe_allow_html=True)
 
 with st.form(key="search_form"):
@@ -345,7 +353,7 @@ if st.session_state.report_data:
                                 <div class="source-card-modern">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div style="display: flex; align-items: center; gap: 6px; max-width: 68%;">
-                                            <span style="background-color: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">#{i+j+1}</span>
+                                            <span style="background-color: #6366f1; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">#{i+j+1}</span>
                                             <span style="font-weight: 600; color: #f8fafc; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
                                         </div>
                                         <span class="score-chip">신뢰도 {score}%</span>
@@ -362,15 +370,4 @@ if st.session_state.report_data:
         st.markdown("### 🌐 실시간 수집 원시 데이터 (Raw Data Explorer)")
         st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         
-        if st.session_state.sources_data:
-            for idx, src in enumerate(st.session_state.sources_data, 1):
-                with st.expander(f"📌 [{idx}] {src['title']}", expanded=True if idx == 1 else False):
-                    st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
-                    st.write(src['content'])
-
-    with tab_audit:
-        st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
-        m1, m2, m3 = st.columns(3)
-        m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1%")
-        m2.metric("공식/학술 출처 비율", f"{academic_ratio}.0%", "고품질 데이터")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data) if st.session_state.sources_data else 0}개", "정상 수집")
+        if st.session_state.sources_data
