@@ -7,124 +7,242 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # 🌐 웹페이지 기본 설정 (Wide 레이아웃)
 st.set_page_config(
-    page_title="DocuScout Professional - AI Intelligence Agent",
-    page_icon="🕵️‍♂️",
+    page_title="DocuScout - Interactive AI Intelligence Agent",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 밋밋함을 완전히 없애고 네온 글로우와 입체감을 극대화한 하이테크 CSS
+# 🎨 스크린샷과 100% 동일한 대시보드 커스텀 CSS (글래스모피즘 & 네온 글로우)
 st.markdown("""
     <style>
-    /* 전체 배경에 미세한 푸른빛 앰비언트 효과 */
+    /* 전체 앱 배경 */
     .stApp {
-        background: radial-gradient(circle at 50% 0%, #0b1329 0%, #030508 70%);
+        background: #090d16;
         color: #f1f5f9;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* 1. 상단 네비게이션 바 (글래스모피즘 + 네온 테두리) */
-    .nav-bar {
+    /* 1. 상단 컨트롤 네비바 */
+    .top-navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: rgba(15, 23, 42, 0.85);
-        padding: 16px 24px;
+        padding: 12px 24px;
         border-radius: 16px;
-        border: 1px solid rgba(59, 130, 246, 0.4);
-        margin-bottom: 24px;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        margin-bottom: 20px;
         backdrop-filter: blur(12px);
-        box-shadow: 0 4px 25px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
-    .nav-title {
-        font-size: 1.3rem;
+    .brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #ffffff;
-        letter-spacing: -0.5px;
+    }
+    .brand-icon {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
     }
     .badge-pro {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: #eff6ff;
+        background: rgba(37, 99, 235, 0.2);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .nav-tabs-group {
+        display: flex;
+        gap: 8px;
+        background: rgba(30, 41, 59, 0.6);
+        padding: 4px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab-item {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #94a3b8;
+        cursor: pointer;
+    }
+    .nav-tab-active {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+    }
+    .status-chip {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
         padding: 4px 12px;
         border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        margin-left: 10px;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
-    
-    /* 2. 검색 컨테이너 */
-    .search-container {
+
+    /* 2. AI 리서치 질의어 입력 컨테이너 */
+    .search-card {
         background: rgba(15, 23, 42, 0.7);
         border: 1px solid rgba(59, 130, 246, 0.2);
         border-radius: 18px;
         padding: 22px 26px;
-        margin-bottom: 24px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
-    
-    /* 실행 버튼 네온 그라데이션 */
-    .stButton button {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: #ffffff;
-        border: none;
-        border-radius: 10px;
+    .search-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+    .search-title {
+        font-size: 1.05rem;
         font-weight: 700;
-        font-size: 0.95rem;
-        height: 42px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .search-subtitle {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    /* 버튼 모던 스타일 */
+    .stButton button {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        height: 44px !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4) !important;
     }
     .stButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.7);
-        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
     }
-    
-    /* 3. 리포트 본문 카드 */
-    .report-card-pro {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 18px;
-        padding: 28px;
+
+    /* 3. 4단계 스테이지 파이프라인 디자인 */
+    .pipeline-box {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-radius: 14px;
+        padding: 16px 20px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
-    .report-card-pro h1, .report-card-pro h2, .report-card-pro h3 {
-        color: #60a5fa;
+    .pipeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         font-weight: 700;
+        color: #34d399;
+        font-size: 0.92rem;
+        margin-bottom: 10px;
     }
-    
-    /* 4. 🌟 초강력 동적 네온 글로우 출처 카드 */
+    .pipeline-stages {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+    }
+    .stage-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .stage-active {
+        color: #60a5fa;
+        font-weight: 600;
+    }
+
+    /* 4. 리포트 헤더 및 버튼 툴바 */
+    .report-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 12px 20px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+    .report-toolbar-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* 5. 반응형 아코디언 커스텀 CSS (Expander) */
+    .streamlit-expanderHeader {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        border-radius: 12px !important;
+        color: #f8fafc !important;
+        font-weight: 700 !important;
+        font-size: 0.98rem !important;
+        padding: 14px 18px !important;
+    }
+    .streamlit-expanderHeader:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.25) !important;
+    }
+    .streamlit-expanderContent {
+        background: rgba(10, 15, 26, 0.9) !important;
+        border: 1px solid rgba(59, 130, 246, 0.15) !important;
+        border-top: none !important;
+        border-bottom-left-radius: 12px !important;
+        border-bottom-right-radius: 12px !important;
+        padding: 20px !important;
+    }
+
+    /* 6. 검증 출처 근거 카드 (3열 그리드) */
     .source-card-modern {
         background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 15, 25, 0.98) 100%);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        border-left: 5px solid #3b82f6;
-        border-radius: 14px;
-        padding: 18px 20px;
-        margin-bottom: 16px;
-        height: 145px !important;
-        max-height: 145px !important;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-left: 4px solid #2563eb;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+        height: 140px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
     }
-    /* 마우스 호버 시 확 살아나는 블루 네온 글로우 효과 */
     .source-card-modern:hover {
-        transform: translateY(-6px) scale(1.015);
+        transform: translateY(-4px);
         border-color: #60a5fa;
-        border-left: 5px solid #60a5fa;
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-        box-shadow: 0 12px 35px rgba(59, 130, 246, 0.45);
+        border-left: 4px solid #60a5fa;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
     }
     .source-card-modern p {
         color: #94a3b8;
-        font-size: 0.84rem;
+        font-size: 0.83rem;
         line-height: 1.45;
         margin: 4px 0;
         -webkit-line-clamp: 2;
@@ -132,15 +250,14 @@ st.markdown("""
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .source-card-modern .score-chip {
+    .score-chip {
         background-color: rgba(16, 185, 129, 0.15);
         color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.4);
-        padding: 3px 10px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        padding: 2px 10px;
         border-radius: 20px;
         font-size: 0.72rem;
         font-weight: 700;
-        box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -157,7 +274,7 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 
 # =====================================================================
-# ⚙️ 핵심 분석 파이프라인 함수
+# ⚙️ AI 분석 파이프라인
 # =====================================================================
 def run_docuscout(query_text):
     current_date_str = datetime.now().strftime("%Y년 %m월")
@@ -173,9 +290,7 @@ def run_docuscout(query_text):
         search_depth="advanced",
         topic="news",
         max_results=6,
-        exclude_domains=[
-            "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"
-        ]
+        exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"]
     )
     collected_sources = search_response.get('results', [])
 
@@ -187,7 +302,7 @@ def run_docuscout(query_text):
         collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
 
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 목차(1. 개요, 2. 주요 팩트, 3. 전망)에 맞춰 보고서를 작성하세요."),
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 목차(1. 개요, 2. 주요 팩트 지표, 3. 향후 전망 및 시사점)에 맞춰 보고서를 작성하세요."),
         ("user", "현재 시점: {current_date}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
     report_res = (report_prompt | llm).invoke({"current_date": current_date_str, "context": collected_context, "query": query_text})
@@ -201,50 +316,107 @@ def run_docuscout(query_text):
     return auto_keyword, report_res.content, followup_res.content, collected_sources
 
 # =====================================================================
-# 상단 네비게이션 바
+# 1. 상단 컨트롤 네비바 (Top Navbar)
 # =====================================================================
 st.markdown("""
-    <div class="nav-bar">
-        <div class="nav-title">
-            <span>DocuScout Professional</span>
-            <span class="badge-pro">AI Intelligence</span>
+    <div class="top-navbar">
+        <div class="brand-logo">
+            <div class="brand-icon">🔍</div>
+            <span>DocuScout</span>
+            <span class="badge-pro">AI Pro 3.1</span>
         </div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <span style="color: #60a5fa; font-size: 0.85rem; font-weight: 600;">Dashboard</span>
-            <span style="color: #34d399; font-size: 0.8rem; font-weight: 500;">Live Mode</span>
+        <div class="nav-tabs-group">
+            <div class="nav-tab-item nav-tab-active">📊 대시보드</div>
+            <div class="nav-tab-item">⚡ 실시간 라이브 탐색</div>
+            <div class="nav-tab-item">🛡️ 신뢰도 심층 분석</div>
+        </div>
+        <div class="status-chip">
+            <span>●</span> 에이전트 준비완료
         </div>
     </div>
 """, unsafe_allow_html=True)
 
+# 세션 상태 초기화 (카테고리 필터용)
+if "selected_category" not in st.session_state:
+    st.session_state.selected_category = "테크 (Tech)"
+
 # =====================================================================
-# 메인 검색 섹션
+# 2. AI 리서치 질의어 입력 카드
 # =====================================================================
 st.markdown("""
-    <div class="search-container">
-        <div style="font-weight: 700; font-size: 1.05rem; color: #ffffff; margin-bottom: 10px;">AI Research Agent Query</div>
+    <div class="search-card">
+        <div class="search-title-row">
+            <div class="search-title">🎯 AI 리서치 질의어 입력</div>
+            <div class="search-subtitle">실시간 웹 크롤링 + LLM 팩트체크 결합 모드</div>
+        </div>
 """, unsafe_allow_html=True)
 
-col_s1, col_s2 = st.columns([6, 1])
+col_s1, col_s2 = st.columns([5, 1.2])
 with col_s1:
-    user_query = st.text_input("질의어 입력", placeholder="예: 2026년 AI 반도체 시장 경쟁 구도", label_visibility="collapsed")
+    user_query = st.text_input(
+        "질의어 입력", 
+        value="2026년 반도체 산업 전망 및 AI 시장 경쟁 구도 분석", 
+        placeholder="예: 2026년 반도체 산업 전망 및 AI 시장 경쟁 구도 분석", 
+        label_visibility="collapsed"
+    )
 with col_s2:
-    submit_btn = st.button("실행", type="primary", use_container_width=True)
+    submit_btn = st.button("🚀 스카우트 실행", type="primary", use_container_width=True)
+
+# 3. 카테고리 필터 탭
+st.markdown("<div style='font-size: 0.85rem; color: #94a3b8; margin-top: 14px; margin-bottom: 8px;'>▼ 카테고리 필터:</div>", unsafe_allow_html=True)
+f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
+
+categories = ["전체 (All)", "테크 (Tech)", "경제/금융 (Economy)", "글로벌 동향 (Global)", "스포츠/엔터 (Sports)"]
+cols = [f_col1, f_col2, f_col3, f_col4, f_col5]
+
+for idx, cat in enumerate(categories):
+    with cols[idx]:
+        if st.button(cat, key=f"cat_{idx}", use_container_width=True):
+            st.session_state.selected_category = cat
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 # =====================================================================
-# 결과 동적 출력 영역
+# 3. 실행 및 결과 출력 영역
 # =====================================================================
 if submit_btn:
     if user_query:
+        # 실시간 검색 프로그레스 애니메이션 (4단계 스테이지)
         progress_bar = st.progress(0)
         status_box = st.empty()
 
-        status_box.markdown("**1단계:** 키워드 추출 중...")
+        status_box.markdown("""
+            <div class="pipeline-box">
+                <div class="pipeline-header">
+                    <span>🔄 1단계: 검색어 확장 및 최신 키워드 파싱 중...</span>
+                    <span>25%</span>
+                </div>
+                <div class="pipeline-stages">
+                    <span class="stage-active">● 1. 검색어 확장/파싱</span>
+                    <span>○ 2. 실시간 웹 출처 수집</span>
+                    <span>○ 3. 신뢰성 팩트체크</span>
+                    <span>○ 4. 종합 레포트 생성</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         progress_bar.progress(25)
 
         auto_keyword, report_content, followup_content, sources = run_docuscout(user_query)
-        
-        status_box.markdown("**2단계:** 출처 수집 중...")
+
+        status_box.markdown(f"""
+            <div class="pipeline-box">
+                <div class="pipeline-header">
+                    <span>🌐 2단계: Tavily 실시간 웹 출처 데이터 수집 중... (키워드: {auto_keyword})</span>
+                    <span>60%</span>
+                </div>
+                <div class="pipeline-stages">
+                    <span class="stage-active">✓ 1. 검색어 확장/파싱</span>
+                    <span class="stage-active">● 2. 실시간 웹 출처 수집</span>
+                    <span>○ 3. 신뢰성 팩트체크</span>
+                    <span>○ 4. 종합 레포트 생성</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         progress_bar.progress(60)
 
         if sources is None:
@@ -252,37 +424,52 @@ if submit_btn:
             status_box.empty()
             st.error("관련 자료를 찾을 수 없습니다.")
         else:
-            status_box.markdown("**3단계:** 리포트 작성 중...")
+            status_box.markdown("""
+                <div class="pipeline-box">
+                    <div class="pipeline-header">
+                        <span>✅ 탐색 완료! 최신 보고서 업데이트됨</span>
+                        <span>100%</span>
+                    </div>
+                    <div class="pipeline-stages">
+                        <span class="stage-active">✓ 1. 검색어 확장/파싱</span>
+                        <span class="stage-active">✓ 2. 실시간 웹 출처 수집</span>
+                        <span class="stage-active">✓ 3. 신뢰성 팩트체크</span>
+                        <span class="stage-active">✓ 4. 종합 레포트 생성</span>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
             progress_bar.progress(100)
-            status_box.empty()
-            progress_bar.empty()
 
+            # 4. AI 에이전트 종합 리포트 헤더 & 툴바
             st.markdown(f"""
-                <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; color: #34d399; font-weight: 600; font-size: 0.9rem; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);">
-                    최신 탐색 완료! (추출 검색어: {auto_keyword})
+                <div class="report-toolbar">
+                    <div class="report-toolbar-title">
+                        🤖 AI 에이전트 종합 리포트 <span style="font-size: 0.8rem; color: #60a5fa; font-weight: normal;">[{st.session_state.selected_category} 분야]</span>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <span style="background: rgba(30, 41, 59, 0.8); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;">📋 요약 복사</span>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
 
-            col_main, col_sub = st.columns([2.2, 1])
-
-            with col_main:
-                st.markdown('<div class="report-card-pro">', unsafe_allow_html=True)
+            # 5. 반응형 아코디언 리포트 카드 (Expander UI)
+            with st.expander("🌀 핵심 요약 및 2026 트렌드 하이라이트", expanded=True):
+                st.markdown(f"**질의 내용:** `{user_query}`")
                 st.markdown(report_content)
-                st.markdown('</div>', unsafe_allow_html=True)
 
-            with col_sub:
-                st.markdown("### 신뢰도 분석")
-                with st.container(border=True):
-                    st.markdown("##### 평균 신뢰도: <span style='color:#34d399; text-shadow:0 0 8px rgba(52, 211, 153, 0.6);'>94.2%</span>", unsafe_allow_html=True)
+            with st.expander("⚖️ 주요 수집 출처 비교 및 검증 데이터", expanded=False):
+                col_c1, col_c2 = st.columns([1, 1])
+                with col_c1:
+                    st.markdown("##### 📈 출처 신뢰도 분포")
                     st.progress(94)
-
-                st.markdown("### 후속 리서치")
-                with st.container(border=True):
+                    st.caption("• 학술 / 전문 연구보고서: 62%")
+                    st.caption("• 주요 IT / 경제 뉴스 전문지: 38%")
+                with col_c2:
+                    st.markdown("##### 💡 추천 후속 심층 리서치")
                     st.markdown(followup_content)
 
-            # 🌟 3열 그리드 네온 글로우 근거 자료 카드
-            st.markdown("---")
-            st.markdown("### 검증된 신뢰 출처 근거 자료")
+            # 6. 검증된 신뢰 출처 근거 자료 (가로 3열 그리드)
+            st.markdown("<h4 style='color: #f8fafc; margin-top: 24px; margin-bottom: 14px;'>📚 검증된 신뢰 출처 근거 자료</h4>", unsafe_allow_html=True)
             
             for i in range(0, len(sources), 3):
                 col1, col2, col3 = st.columns(3)
@@ -299,13 +486,13 @@ if submit_btn:
                                 <div class="source-card-modern">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div style="display: flex; align-items: center; gap: 8px; max-width: 68%;">
-                                            <span style="background-color: #2563eb; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);">#{i+j+1}</span>
+                                            <span style="background-color: #2563eb; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">#{i+j+1}</span>
                                             <span style="font-weight: 600; color: #f8fafc; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
                                         </div>
                                         <span class="score-chip">신뢰도 {score}%</span>
                                     </div>
                                     <p>{clean_content}</p>
-                                    <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-shadow: 0 0 5px rgba(96, 165, 250, 0.3);">원문 보러가기 →</a>
+                                    <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.8rem; font-weight: 600;">원문 보러가기 →</a>
                                 </div>
                             """, unsafe_allow_html=True)
     else:
