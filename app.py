@@ -88,6 +88,22 @@ st.markdown("""
         padding: 18px;
         margin-bottom: 12px;
         transition: transform 0.2s ease, border-color 0.2s ease;
+        
+        /* 💥 추가: 박스 높이 고정 및 넘침 방지 */
+        height: 170px;
+        overflow: hidden;
+        position: relative;
+    }
+    .source-card-dark p {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .source-card-dark:hover {
         transform: translateY(-2px);
@@ -267,11 +283,14 @@ if submit_btn:
                 st.markdown(f"""
                     <div class="source-card-dark">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span style="font-weight: 600; color: #f8fafc; font-size: 1rem;">근거 카드 #{idx} : {src['title']}</span>
+                            <span style="font-weight: 600; color: #f8fafc; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">근거 카드 #{idx} : {src['title']}</span>
                             <span style="background-color: #1e3a8a; color: #bfdbfe; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">신뢰도 {score}%</span>
                         </div>
-                        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.4; margin-bottom: 8px;">{src['content'][:200]}...</p>
-                        <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">🔗 원문 보러가기 →</a>
+                        
+                        <!-- 💥 수정: 슬라이싱을 제거하고 전체 내용을 넣으면 CSS가 알아서 3줄로 잘라줍니다 -->
+                        <p>{src['content']}</p>
+                        
+                        <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500; position: absolute; bottom: 16px; left: 18px;">🔗 원문 보러가기 →</a>
                     </div>
                 """, unsafe_allow_html=True)
     else:
