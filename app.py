@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 칙칙한 어두운색을 완전히 뺀 화사하고 세련된 '라이트 아로라' 테마 CSS
+# 🎨 칙칙함을 완전히 걷어내고 검색 입력부를 완벽히 고급화한 라이트 테마 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -73,7 +73,18 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 탭 스타일 고급화 (라이트톤) */
+    /* 🌟 검색 바 패널 일체형 디자인 */
+    .search-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(203, 213, 225, 0.75);
+        border-radius: 22px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.08);
+    }
+
+    /* 탭 스타일 고급화 */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
         background-color: rgba(255, 255, 255, 0.7);
@@ -291,11 +302,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 검색 카드 & st.form
+# 2. 일체형 검색 바 패널 (st.form 통합)
 # =====================================================================
 st.markdown("""
-    <div style="background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(203, 213, 225, 0.7); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
-        <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
+    <div class="search-panel">
+        <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>🎯</span> AI 리서치 질의어 입력
+        </div>
 """, unsafe_allow_html=True)
 
 with st.form(key="search_form"):
