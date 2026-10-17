@@ -470,4 +470,7 @@ if submit_btn:
             m1, m2, m3 = st.columns(3)
             m1.metric("평균 신뢰도 점수", "92.4%", "+1.8%")
             m2.metric("공식/학술 출처 비율", "58.0%", "고품질 데이터")
-            m3.metric("검증 완료 출처", f"{len(sources)}개", "100% 정상 수
+            m3.metric("검증 완료 출처", f"{len(sources)}개", "100% 정상 수집")
+
+    else:
+        st.warning("⚠️ 질의어를 입력해주세요!")
