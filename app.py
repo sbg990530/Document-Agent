@@ -14,107 +14,138 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 칙칙함을 완전히 없앤 화사하고 세련된 '아로라 글래스모피즘' 테마 CSS
+# 🎨 밋밋함을 없애고 트렌디한 네온 오로라 글래스모피즘을 극대화한 CSS
 st.markdown("""
     <style>
-    /* 전체 배경: 화사하고 깊이감 있는 프리미엄 오로라 블루 그라데이션 */
+    /* 전체 배경: 화사한 네온 아로라 오로라 그라데이션 */
     .stApp {
-        background: radial-gradient(circle at 50% -20%, #312e81 0%, #1e1b4b 40%, #0f172a 100%);
+        background: radial-gradient(circle at 15% 15%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 85% 85%, rgba(147, 51, 234, 0.12) 0%, transparent 40%),
+                    linear-gradient(135deg, #0f172a 0%, #090d16 100%);
         color: #f8fafc;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* 상단 네비바 (더욱 선명하고 화사한 글래스 스타일) */
+    /* 상단 네비바 */
     .top-navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(30, 41, 59, 0.65);
-        padding: 14px 26px;
-        border-radius: 18px;
-        border: 1px solid rgba(129, 140, 248, 0.3);
+        background: rgba(30, 41, 59, 0.7);
+        padding: 14px 28px;
+        border-radius: 20px;
+        border: 1px solid rgba(129, 140, 248, 0.35);
         margin-bottom: 24px;
-        backdrop-filter: blur(16px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .brand-logo {
         display: flex;
         align-items: center;
         gap: 12px;
-        font-size: 1.25rem;
+        font-size: 1.3rem;
         font-weight: 800;
         color: #ffffff;
+        letter-spacing: -0.5px;
     }
     .brand-icon {
-        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-        width: 36px;
-        height: 36px;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        width: 38px;
+        height: 38px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.1rem;
-        box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
     }
     .status-chip {
-        background: rgba(16, 185, 129, 0.2);
+        background: rgba(16, 185, 129, 0.15);
         color: #34d399;
         border: 1px solid rgba(52, 211, 153, 0.4);
-        padding: 5px 14px;
+        padding: 6px 14px;
         border-radius: 20px;
         font-size: 0.8rem;
         font-weight: 600;
         display: flex;
         align-items: center;
         gap: 8px;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
     }
 
-    /* 🌟 모든 버튼 스타일 (선명한 인디고-블루 그라데이션 및 확실한 가시성) */
+    /* 탭 스타일 고급화 */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: rgba(30, 41, 59, 0.5);
+        padding: 6px;
+        border-radius: 16px;
+        border: 1px solid rgba(129, 140, 248, 0.25);
+        backdrop-filter: blur(12px);
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 44px;
+        background-color: transparent;
+        border-radius: 12px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0 24px;
+        transition: all 0.25s ease;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    /* 버튼 스타일 (네온 인디고 그라데이션) */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
-        background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        border: 1px solid rgba(129, 140, 248, 0.4) !important;
+        border: 1px solid rgba(129, 140, 248, 0.5) !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
         font-size: 0.92rem !important;
         height: 44px !important;
         transition: all 0.25s ease !important;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
     }
-    
     div.stButton > button:hover, 
     div.stFormSubmitButton > button:hover, 
     div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
-        border-color: #818cf8 !important;
-        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6) !important;
+        border-color: #a5b4fc !important;
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.7) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 스타일 (화사한 테두리 광채 효과) */
+    /* 3열 출처 카드 (글래스모피즘 + 호버 네온 글로우) */
     .source-card-modern {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
         border: 1px solid rgba(129, 140, 248, 0.25);
         border-left: 4px solid #6366f1;
         border-radius: 16px;
         padding: 18px 20px;
         margin-bottom: 12px;
-        height: 170px !important;
+        height: 175px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(12px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .source-card-modern:hover {
-        transform: translateY(-4px);
+        transform: translateY(-5px);
         border-color: #818cf8;
-        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        border-left: 4px solid #818cf8;
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.45);
+        background: linear-gradient(145deg, rgba(51, 65, 85, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
     }
     .source-card-modern p {
         color: #cbd5e1;
@@ -130,10 +161,11 @@ st.markdown("""
         background-color: rgba(16, 185, 129, 0.2);
         color: #34d399;
         border: 1px solid rgba(52, 211, 153, 0.4);
-        padding: 2px 9px;
+        padding: 2px 10px;
         border-radius: 20px;
         font-size: 0.72rem;
         font-weight: 700;
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -264,7 +296,7 @@ st.markdown("""
 # 2. 검색 카드 & st.form
 # =====================================================================
 st.markdown("""
-    <div style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.25);">
         <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
 """, unsafe_allow_html=True)
 
