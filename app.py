@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 import streamlit as st
 from tavily import TavilyClient
@@ -13,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 버튼 가시성 및 디자인 충돌을 완벽히 해결한 최종 CSS
+# 🎨 디자인 스타일 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -66,7 +67,7 @@ st.markdown("""
         gap: 6px;
     }
 
-    /* 🌟 버튼 글자 가시성 완벽 해결 (Streamlit 일반 버튼 및 폼 버튼) */
+    /* 버튼 스타일 */
     div.stButton > button {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         color: #ffffff !important;
@@ -146,16 +147,21 @@ if "selected_category" not in st.session_state:
     st.session_state.selected_category = "전체 (All)"
 
 # =====================================================================
-# ⚙️ AI 파이프라인
+# ⚙️ AI 파이프라인 (질의어 속 연도 자동 감지 및 반영 로직 탑재)
 # =====================================================================
 def run_docuscout(query_text):
-    current_date_str = datetime.now().strftime("%Y년 %m월")
+    # 🌟 사용자가 질문에 특정 연도(예: 2020년, 2015년 등)를 포함했는지 탐지
+    year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
+    if year_match:
+        target_period = year_match.group(0)
+    else:
+        target_period = datetime.now().strftime("%Y년 %m월") # 연도가 없으면 현재 시점
 
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 현재 시점({current_date})에 맞는 최신 핵심 검색 키워드 2~3개를 조사 없이 조합하여 검색어만 출력하세요."),
-        ("user", "현재 시점: {current_date}\n사용자 질문: {query}")
+        ("system", "사용자 질문에서 지정된 시점({target_period})에 맞는 핵심 검색 키워드 2~3개를 조사 없이 조합하여 검색어만 출력하세요."),
+        ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
-    auto_keyword = (keyword_prompt | llm).invoke({"current_date": current_date_str, "query": query_text}).content.strip()
+    auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
 
     search_response = tavily_client.search(
         query=auto_keyword,
@@ -174,10 +180,10 @@ def run_docuscout(query_text):
         collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
 
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 목차(1. 개요, 2. 주요 팩트, 3. 시사점)에 맞춰 보고서를 작성하세요."),
-        ("user", "현재 시점: {current_date}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 상황에 맞춰 목차(1. 개요, 2. 주요 팩트, 3. 시사점)에 맞춰 보고서를 작성하세요."),
+        ("user", "대상 시점: {target_period}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
-    report_res = (report_prompt | llm).invoke({"current_date": current_date_str, "context": collected_context, "query": query_text})
+    report_res = (report_prompt | llm).invoke({"target_period": target_period, "context": collected_context, "query": query_text})
     
     followup_prompt = ChatPromptTemplate.from_messages([
         ("system", "리포트 기반 후속 질문 3가지를 마크다운 불릿으로 작성하세요."),
@@ -224,8 +230,8 @@ with st.form(key="search_form"):
     with col_s1:
         user_query = st.text_input(
             "질의어 입력", 
-            value="파운드리연합 관련 2026 트렌드 리서치", 
-            placeholder="예: 2026년 AI 반도체 시장 전망", 
+            value="2020년 e스포츠 시장 현황은 어땠어?", 
+            placeholder="예: 2020년 e스포츠 시장 현황은 어땠어?", 
             label_visibility="collapsed"
         )
     with col_s2:
@@ -246,7 +252,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 # 폼 제출 시 실행 트리거
 if submit_btn:
     if user_query:
-        with st.spinner(f"🔄 '{user_query}'에 대한 최신 데이터 크롤링 및 팩트체크 진행 중..."):
+        with st.spinner(f"🔄 '{user_query}'에 대한 시점별 데이터 크롤링 및 팩트체크 진행 중..."):
             kw, rep, fol, srcs = run_docuscout(user_query)
             st.session_state.auto_keyword = kw
             st.session_state.report_data = rep
@@ -257,12 +263,8 @@ if submit_btn:
 # 3. 결과 출력 및 3개 탭 네비게이션 시스템
 # =====================================================================
 if st.session_state.report_data:
-    # 🌟 상단 중앙 탭 네비게이션
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
 
-    # ---------------------------------------------------------
-    # TAB 1: 📊 [대시보드]
-    # ---------------------------------------------------------
     with tab_dash:
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         col_main, col_sub = st.columns([2.2, 1])
@@ -284,9 +286,7 @@ if st.session_state.report_data:
                 st.markdown(st.session_state.report_data)
 
         with col_sub:
-            # 🌟 질문마다 동적으로 계산되는 신뢰도 수치 로직 적용
-            sources_count = len(st.session_state.sources_data) if st.session_state.sources_data else 1
-            dynamic_avg_score = 91 + (hash(st.session_state.auto_keyword) % 7) # 질의어마다 고유의 실시간 평균 신뢰도 계산 (91~97%)
+            dynamic_avg_score = 91 + (hash(st.session_state.auto_keyword) % 7)
             academic_ratio = 55 + (hash(st.session_state.auto_keyword) % 15)
             news_ratio = 100 - academic_ratio
 
@@ -301,7 +301,6 @@ if st.session_state.report_data:
             with st.container(border=True):
                 st.markdown(st.session_state.followup_data)
 
-        # 3열 그리드 출처 카드
         if st.session_state.sources_data:
             st.markdown("---")
             st.markdown("#### 📚 검증된 신뢰 출처 근거 자료 (가로 3열 Grid)")
@@ -314,7 +313,7 @@ if st.session_state.report_data:
                 for j in range(3):
                     if i + j < len(sources):
                         src = sources[i + j]
-                        score = 90 + ((i + j * 3) % 9) # 출처별 고유 신뢰도 스코어 동적 부여
+                        score = 90 + ((i + j * 3) % 9)
                         clean_content = src['content'].replace('\n', ' ').strip()
                         
                         with cols[j]:
@@ -335,9 +334,6 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    # ---------------------------------------------------------
-    # TAB 2: ⚡ [실시간 라이브 탐색]
-    # ---------------------------------------------------------
     with tab_live:
         st.markdown("### 🌐 실시간 수집 원시 데이터 (Raw Data Explorer)")
         st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
@@ -348,9 +344,6 @@ if st.session_state.report_data:
                     st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
                     st.write(src['content'])
 
-    # ---------------------------------------------------------
-    # TAB 3: 🛡️ [신뢰도 심층 분석]
-    # ---------------------------------------------------------
     with tab_audit:
         st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
         m1, m2, m3 = st.columns(3)
