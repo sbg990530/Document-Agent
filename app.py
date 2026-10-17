@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 탭 고정 및 깔끔한 인터랙션을 위한 최종 CSS
+# 🎨 디자인 스타일 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -121,7 +121,7 @@ tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 
 # =====================================================================
-# 세션 상태 초기화 (데이터 유실 방지)
+# 세션 상태 초기화
 # =====================================================================
 if "report_data" not in st.session_state:
     st.session_state.report_data = None
@@ -201,23 +201,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 검색 카드 & 카테고리 필터
+# 2. 검색 카드 & st.form (신규 리서치 실행 오류 완벽 해결)
 # =====================================================================
 st.markdown("""
     <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 20px 24px; margin-bottom: 20px;">
         <div style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 10px;">🎯 AI 리서치 질의어 입력</div>
 """, unsafe_allow_html=True)
 
-col_s1, col_s2 = st.columns([5, 1.2])
-with col_s1:
-    user_query = st.text_input(
-        "질의어 입력", 
-        value="파운드리연합 관련 2026 트렌드 리서치", 
-        placeholder="예: 파운드리연합 관련 2026 트렌드 리서치", 
-        label_visibility="collapsed"
-    )
-with col_s2:
-    submit_btn = st.button("🚀 스카우트 실행", type="primary", use_container_width=True)
+with st.form(key="search_form"):
+    col_s1, col_s2 = st.columns([5, 1.2])
+    with col_s1:
+        user_query = st.text_input(
+            "질의어 입력", 
+            value="파운드리연합 관련 2026 트렌드 리서치", 
+            placeholder="예: 2026년 AI 반도체 시장 전망", 
+            label_visibility="collapsed"
+        )
+    with col_s2:
+        submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
 
 st.markdown("<div style='font-size: 0.8rem; color: #cbd5e1; margin-top: 12px; margin-bottom: 6px;'>▼ 카테고리 필터:</div>", unsafe_allow_html=True)
 f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
@@ -231,10 +232,10 @@ for idx, cat in enumerate(categories):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 스카우트 실행 시 세션에 데이터 저장
+# 폼 제출 시 실행 트리거
 if submit_btn:
     if user_query:
-        with st.spinner("🔄 최신 데이터 크롤링 및 팩트체크 진행 중..."):
+        with st.spinner(f"🔄 '{user_query}'에 대한 최신 데이터 크롤링 및 팩트체크 진행 중..."):
             kw, rep, fol, srcs = run_docuscout(user_query)
             st.session_state.auto_keyword = kw
             st.session_state.report_data = rep
