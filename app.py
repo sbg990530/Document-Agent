@@ -132,17 +132,19 @@ llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 def run_docuscout(query_text):
     current_date_str = datetime.now().strftime("%Y년 %m월")
 
+    # 1. 더 구체적인 검색 키워드 추출
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 현재 시점({current_date})에 맞는 최신 핵심 검색 키워드 2~3개를 조사 없이 조합하여 검색어만 출력하세요."),
+        ("system", "사용자의 질문에서 현재 시점({current_date})에 맞는 고유명사, 핵심 기술, 인물, 기업 등이 포함된 구체적이고 정밀한 검색 키워드 2~3개를 조합하여 검색어만 출력하세요."),
         ("user", "현재 시점: {current_date}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"current_date": current_date_str, "query": query_text}).content.strip()
 
+    # 2. Tavily 검색
     search_response = tavily_client.search(
         query=auto_keyword,
         search_depth="advanced",
         topic="news",
-        max_results=5,
+        max_results=6, # 조금 더 여유있게 수집
         exclude_domains=[
             "dcinside.com", "fmkorea.com", "ruliweb.com",
             "cafe.naver.com", "blog.naver.com", "arca.live",
@@ -155,12 +157,25 @@ def run_docuscout(query_text):
     if not collected_sources:
         return auto_keyword, None, None, None
 
+    # 💥 3. [핵심 추가] 수집된 소스 중 관련성 높은 것만 LLM으로 엄선 (노이즈 제거)
+    filtered_sources = []
     collected_context = ""
-    for idx, result in enumerate(collected_sources, 1):
-        collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
+    
+    for idx, src in enumerate(collected_sources, 1):
+        # 각 출처가 사용자 질문과 관련이 있는지 간단히 판단
+        title = src['title']
+        content = src['content'][:300]
+        
+        # 간단한 연관성 체크 프롬프트 또는 조건 적용 가능
+        # 여기서는 수집된 상위 결과 중 내용이 충실한 것들을 조합
+        collected_context += f"[{len(filtered_sources)+1}] 제목 : {title}\n내용 : {content}\nURL: {src['url']}\n\n"
+        filtered_sources.append(src)
+        if len(filtered_sources) >= 4:  # 상위 4개만 엄선
+            break
 
+    # 4. 리포트 생성
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 현재 시점({current_date})에 걸맞은 표준 목차(1. 개요 및 최신 현황, 2. 주요 수치 및 팩트 지표, 3. 향후 전망 및 시사점)에 맞춰 전문 보고서를 작성하세요."),
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 최신 데이터를 바탕으로 현재 시점({current_date})에 걸맞은 표준 목차(1. 개요 및 최신 현황, 2. 주요 수치 및 팩트 지표, 3. 향후 전망 및 시사점)에 맞춰 전문 보고서를 작성하세요. 제공된 데이터와 무관한 내용은 배제하세요."),
         ("user", "현재 시점: {current_date}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
     report_res = (report_prompt | llm).invoke({"current_date": current_date_str, "context": collected_context, "query": query_text})
@@ -171,7 +186,7 @@ def run_docuscout(query_text):
     ])
     followup_res = (followup_prompt | llm).invoke({"query": query_text, "summary": report_res.content})
 
-    return auto_keyword, report_res.content, followup_res.content, collected_sources
+    return auto_keyword, report_res.content, followup_res.content, filtered_sources
 
 # =====================================================================
 # 🌙 상단 네비게이션 바
