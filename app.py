@@ -14,10 +14,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 칙칙함을 완전히 걷어내고 검색 입력부를 완벽히 고급화한 라이트 테마 CSS
+# 🎨 완전한 일체형 검색 패널 디자인이 적용된 CSS
 st.markdown("""
     <style>
-    /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
     .stApp {
         background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
                     radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
@@ -46,7 +45,6 @@ st.markdown("""
         font-size: 1.3rem;
         font-weight: 800;
         color: #0f172a;
-        letter-spacing: -0.5px;
     }
     .brand-icon {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
@@ -73,15 +71,14 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 🌟 검색 바 패널 일체형 디자인 */
-    .search-panel {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(203, 213, 225, 0.75);
-        border-radius: 22px;
-        padding: 24px 28px;
+    /* 🌟 완벽한 일체형 검색 패널 */
+    .search-panel-box {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        border-radius: 24px;
+        padding: 26px 30px;
         margin-bottom: 24px;
-        backdrop-filter: blur(16px);
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.08);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.08);
     }
 
     /* 탭 스타일 고급화 */
@@ -91,7 +88,6 @@ st.markdown("""
         padding: 6px;
         border-radius: 16px;
         border: 1px solid rgba(203, 213, 225, 0.6);
-        backdrop-filter: blur(12px);
     }
     .stTabs [data-baseweb="tab"] {
         height: 44px;
@@ -101,7 +97,6 @@ st.markdown("""
         font-weight: 600;
         font-size: 0.95rem;
         padding: 0 24px;
-        transition: all 0.25s ease;
     }
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
@@ -109,7 +104,7 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
 
-    /* 버튼 스타일 (선명한 인디고 블루) */
+    /* 버튼 스타일 */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
@@ -121,7 +116,6 @@ st.markdown("""
         font-weight: 700 !important;
         font-size: 0.92rem !important;
         height: 44px !important;
-        transition: all 0.25s ease !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
     }
     div.stButton > button:hover, 
@@ -134,7 +128,7 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 (화사하고 깨끗한 라이트 글래스 카드) */
+    /* 3열 출처 카드 */
     .source-card-modern {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(203, 213, 225, 0.7);
@@ -147,15 +141,6 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
-        backdrop-filter: blur(12px);
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .source-card-modern:hover {
-        transform: translateY(-4px);
-        border-color: #6366f1;
-        border-left: 4px solid #4f46e5;
-        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
-        background: #ffffff;
     }
     .source-card-modern p {
         color: #475569;
@@ -302,14 +287,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 일체형 검색 바 패널 (st.form 통합)
+# 2. 완벽한 일체형 검색 바 패널 (이중 박스 완전 제거)
 # =====================================================================
-st.markdown("""
-    <div class="search-panel">
-        <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-            <span>🎯</span> AI 리서치 질의어 입력
-        </div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="search-panel-box">', unsafe_allow_html=True)
+st.markdown('<div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
 
 with st.form(key="search_form"):
     col_s1, col_s2 = st.columns([5, 1.2])
@@ -323,7 +304,7 @@ with st.form(key="search_form"):
     with col_s2:
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 if submit_btn:
     if user_query:
