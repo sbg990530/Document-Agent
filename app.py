@@ -93,7 +93,7 @@ st.markdown("""
         border-radius: 14px;
         padding: 16px 18px;
         margin-bottom: 10px;
-        height: 155px !important;
+        height: 165px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -104,7 +104,7 @@ st.markdown("""
         font-size: 0.82rem;
         line-height: 1.4;
         margin: 4px 0;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         overflow: hidden;
@@ -147,15 +147,14 @@ if "selected_category" not in st.session_state:
     st.session_state.selected_category = "전체 (All)"
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (질의어 속 연도 자동 감지 및 반영 로직 탑재)
+# ⚙️ AI 파이프라인 (출처 한국어 번역 및 요약 로직 추가)
 # =====================================================================
 def run_docuscout(query_text):
-    # 🌟 사용자가 질문에 특정 연도(예: 2020년, 2015년 등)를 포함했는지 탐지
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     if year_match:
         target_period = year_match.group(0)
     else:
-        target_period = datetime.now().strftime("%Y년 %m월") # 연도가 없으면 현재 시점
+        target_period = datetime.now().strftime("%Y년 %m월")
 
     keyword_prompt = ChatPromptTemplate.from_messages([
         ("system", "사용자 질문에서 지정된 시점({target_period})에 맞는 핵심 검색 키워드 2~3개를 조사 없이 조합하여 검색어만 출력하세요."),
@@ -175,30 +174,52 @@ def run_docuscout(query_text):
     if not collected_sources:
         return auto_keyword, None, None, None
 
+    # 🌟 수집된 모든 출처의 제목과 내용을 자연스러운 한국어로 번역/정제
+    refined_sources = []
+    for result in collected_sources:
+        translate_prompt = ChatPromptTemplate.from_messages([
+            ("system", "제공된 외신 제목과 내용을 자연스럽고 명확한 '한국어'로 각각 번역 및 요약하여 출력하세요. 반드시 아래 JSON 형식 또는 구분된 형태로 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+            ("user", f"원문 제목: {result['title']}\n원문 내용: {result['content']}")
+        ])
+        trans_res = (translate_prompt | llm).invoke({}).content
+        
+        # 파싱
+        title_match = re.search(r'제목:\s*(.+)', trans_res)
+        content_match = re.search(r'내용:\s*([\s\S]+)', trans_res)
+        
+        kr_title = title_match.group(1).strip() if title_match else result['title']
+        kr_content = content_match.group(1).strip() if content_match else result['content']
+
+        refined_sources.append({
+            "title": kr_title,
+            "content": kr_content,
+            "url": result['url']
+        })
+
     collected_context = ""
-    for idx, result in enumerate(collected_sources, 1):
+    for idx, result in enumerate(refined_sources, 1):
         collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
 
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 상황에 맞춰 목차(1. 개요, 2. 주요 팩트, 3. 시사점)에 맞춰 보고서를 작성하세요."),
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 상황에 맞춰 목차(1. 개요, 2. 주요 팩트, 3. 시사점)에 맞춰 한국어 보고서를 작성하세요."),
         ("user", "대상 시점: {target_period}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
     report_res = (report_prompt | llm).invoke({"target_period": target_period, "context": collected_context, "query": query_text})
     
     followup_prompt = ChatPromptTemplate.from_messages([
-        ("system", "리포트 기반 후속 질문 3가지를 마크다운 불릿으로 작성하세요."),
+        ("system", "리포트 기반 후속 질문 3가지를 한국어 마크다운 불릿으로 작성하세요."),
         ("user", "주제: {query}\n요약:\n{summary}")
     ])
     followup_res = (followup_prompt | llm).invoke({"query": query_text, "summary": report_res.content})
 
-    return auto_keyword, report_res.content, followup_res.content, collected_sources
+    return auto_keyword, report_res.content, followup_res.content, refined_sources
 
 @st.dialog("📖 검증 출처 원문 상세보기")
 def open_source_modal(src_item, score):
     st.markdown(f"### {src_item['title']}")
     st.markdown(f"**신뢰도 평가:** `:green[신뢰도 {score}%]` | **원문 URL:** [{src_item['url']}]({src_item['url']})")
     st.markdown("---")
-    st.markdown("##### 📄 수집된 원문 텍스트 스니펫:")
+    st.markdown("##### 📄 한국어 정제 및 번역된 스니펫:")
     st.info(src_item['content'])
 
 # =====================================================================
@@ -249,10 +270,9 @@ for idx, cat in enumerate(categories):
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 폼 제출 시 실행 트리거
 if submit_btn:
     if user_query:
-        with st.spinner(f"🔄 '{user_query}'에 대한 시점별 데이터 크롤링 및 팩트체크 진행 중..."):
+        with st.spinner(f"🔄 '{user_query}'에 대한 다국어 수집 및 한국어 정제/팩트체크 진행 중..."):
             kw, rep, fol, srcs = run_docuscout(user_query)
             st.session_state.auto_keyword = kw
             st.session_state.report_data = rep
@@ -335,18 +355,4 @@ if st.session_state.report_data:
                                 open_source_modal(src, score)
 
     with tab_live:
-        st.markdown("### 🌐 실시간 수집 원시 데이터 (Raw Data Explorer)")
-        st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
-        
-        if st.session_state.sources_data:
-            for idx, src in enumerate(st.session_state.sources_data, 1):
-                with st.expander(f"📌 [{idx}] {src['title']}", expanded=True if idx == 1 else False):
-                    st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
-                    st.write(src['content'])
-
-    with tab_audit:
-        st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
-        m1, m2, m3 = st.columns(3)
-        m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1%")
-        m2.metric("공식/학술 출처 비율", f"{academic_ratio}.0%", "고품질 데이터")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data) if st.session_state.sources_data else 0}개", "정상 수집")
+        st.markdown("### 🌐 실시간 수집 원
