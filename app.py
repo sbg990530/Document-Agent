@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 디자인 스타일 CSS
+# 🎨 버튼 글자 가시성을 완벽하게 보장하는 최종 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -67,22 +67,31 @@ st.markdown("""
         gap: 6px;
     }
 
-    /* 버튼 스타일 및 가시성 확보 */
-    div.stButton > button {
+    /* 🌟 모든 버튼 (일반 버튼, 폼 제출 버튼, 다운로드 버튼) 글자 가시성 및 디자인 강제 고정 */
+    div.stButton > button, 
+    div.stFormSubmitButton > button, 
+    div.stDownloadButton > button {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(96, 165, 250, 0.3) !important;
+        -webkit-text-fill-color: #ffffff !important;
+        border: 1px solid rgba(96, 165, 250, 0.4) !important;
         border-radius: 10px !important;
         font-weight: 700 !important;
+        font-size: 0.9rem !important;
         height: 42px !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35) !important;
     }
-    div.stButton > button:hover {
+    
+    div.stButton > button:hover, 
+    div.stFormSubmitButton > button:hover, 
+    div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
         border-color: #60a5fa !important;
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.5) !important;
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.55) !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
     }
 
     /* 3열 출처 카드 스타일 */
@@ -147,7 +156,7 @@ if "selected_category" not in st.session_state:
     st.session_state.selected_category = "전체 (All)"
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (과거 연도 정밀 타겟팅 및 무관한 기사 필터링)
+# ⚙️ AI 파이프라인
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -156,9 +165,8 @@ def run_docuscout(query_text):
     else:
         target_period = datetime.now().strftime("%Y년 %m월")
 
-    # 🌟 검색어 생성 시 주제와 연도가 명확히 결합되도록 프롬프트 강화
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 주제를 반영하여 검색 정확도를 높일 수 있는 검색어 1개만 정확하게 출력하세요. (예: 2020년 e스포츠 시장 규모 전망)"),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 주제를 반영하여 검색 정확도를 높일 수 있는 검색어 1개만 정확하게 출력하세요."),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -166,13 +174,12 @@ def run_docuscout(query_text):
     search_response = tavily_client.search(
         query=auto_keyword,
         search_depth="advanced",
-        topic="general", # general 토픽으로 설정하여 과거 웹 문서 및 보고서까지 폭넓게 탐색
+        topic="general",
         max_results=10,
         exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"]
     )
     raw_sources = search_response.get('results', [])
 
-    # 🌟 자동차, 포르쉐, 베팅 등 질문 주제(e스포츠 등)와 무관한 잡음 기사 필터링
     filtered_sources = []
     noise_keywords = ["포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러"]
     for src in raw_sources:
@@ -185,7 +192,6 @@ def run_docuscout(query_text):
     if not collected_sources:
         return auto_keyword, None, None, None
 
-    # 수집된 출처 한국어 번역 및 요약 정제
     refined_sources = []
     for result in collected_sources:
         translate_prompt = ChatPromptTemplate.from_messages([
