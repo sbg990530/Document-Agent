@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 버튼 글자 가시성을 완벽하게 보장하는 최종 CSS
+# 🎨 UI/UX 및 버튼 가시성 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -67,7 +67,7 @@ st.markdown("""
         gap: 6px;
     }
 
-    /* 🌟 모든 버튼 (일반 버튼, 폼 제출 버튼, 다운로드 버튼) 글자 가시성 및 디자인 강제 고정 */
+    /* 버튼 글자 가시성 및 디자인 강제 고정 */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
@@ -152,8 +152,6 @@ if "followup_data" not in st.session_state:
     st.session_state.followup_data = None
 if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
-if "selected_category" not in st.session_state:
-    st.session_state.selected_category = "전체 (All)"
 
 # =====================================================================
 # ⚙️ AI 파이프라인
@@ -255,11 +253,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 검색 카드 & st.form
+# 2. 검색 카드 & st.form (카테고리 필터 제거 완료)
 # =====================================================================
 st.markdown("""
-    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 20px 24px; margin-bottom: 20px;">
-        <div style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 10px;">🎯 AI 리서치 질의어 입력</div>
+    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 22px 26px; margin-bottom: 20px;">
+        <div style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 12px;">🎯 AI 리서치 질의어 입력</div>
 """, unsafe_allow_html=True)
 
 with st.form(key="search_form"):
@@ -273,16 +271,6 @@ with st.form(key="search_form"):
         )
     with col_s2:
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
-
-st.markdown("<div style='font-size: 0.8rem; color: #cbd5e1; margin-top: 12px; margin-bottom: 6px;'>▼ 카테고리 필터:</div>", unsafe_allow_html=True)
-f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
-categories = ["전체 (All)", "테크 (Tech)", "경제/금융 (Economy)", "글로벌 동향 (Global)", "스포츠/엔터 (Sports)"]
-cols = [f_col1, f_col2, f_col3, f_col4, f_col5]
-
-for idx, cat in enumerate(categories):
-    with cols[idx]:
-        if st.button(cat, key=f"cat_{idx}", use_container_width=True):
-            st.session_state.selected_category = cat
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -308,7 +296,7 @@ if st.session_state.report_data:
         with col_main:
             col_h1, col_h2 = st.columns([3, 1.2])
             with col_h1:
-                st.markdown(f"#### 🤖 AI 에이전트 종합 리포트 <span style='font-size:0.75rem; color:#60a5fa;'>[{st.session_state.selected_category}]</span>", unsafe_allow_html=True)
+                st.markdown("#### 🤖 AI 에이전트 종합 리포트")
             with col_h2:
                 st.download_button(
                     label="📥 리포트 다운로드",
@@ -339,7 +327,7 @@ if st.session_state.report_data:
 
         if st.session_state.sources_data:
             st.markdown("---")
-            st.markdown("#### 📚 검증된 신뢰 출처 근거 자료")
+            st.markdown("#### 📚 검증된 신뢰 출처 근거 자료 (가로 3열 Grid)")
             
             sources = st.session_state.sources_data
             for i in range(0, len(sources), 3):
