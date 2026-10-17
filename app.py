@@ -221,7 +221,7 @@ st.markdown("""
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
             <span style="background-color: #1f2937; color: #60a5fa; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;"> 대시보드</span>
-            <span style="color: #34d399; font-size: 0.85rem; font-weight: 500;">🟢 실시간 라이브 탐색 모드</span>
+            <span style="color: #34d399; font-size: 0.85rem; font-weight: 500;"> 실시간 라이브 탐색 모드</span>
         </div>
     </div>
 """, unsafe_allow_html=True)
