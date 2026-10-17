@@ -13,28 +13,28 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 밋밋함을 없애고 입체감을 극대화한 글래스모피즘 & 사이버 프로 커스텀 CSS
+# 🎨 밋밋함을 완전히 없애고 네온 글로우와 입체감을 극대화한 하이테크 CSS
 st.markdown("""
     <style>
-    /* 전체 배경을 더 짙게 처리하여 콘텐츠 입체감 강조 */
+    /* 전체 배경에 미세한 푸른빛 앰비언트 효과 */
     .stApp {
-        background-color: #030508;
+        background: radial-gradient(circle at 50% 0%, #0b1329 0%, #030508 70%);
         color: #f1f5f9;
         font-family: 'Inter', sans-serif;
     }
     
-    /* 1. 상단 네비게이션 바: 더 세련된 네온 라인 */
+    /* 1. 상단 네비게이션 바 (글래스모피즘 + 네온 테두리) */
     .nav-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(15, 23, 42, 0.8);
-        padding: 16px 28px;
+        background: rgba(15, 23, 42, 0.85);
+        padding: 16px 24px;
         border-radius: 16px;
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        margin-bottom: 28px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 30px rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        margin-bottom: 24px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 25px rgba(59, 130, 246, 0.2);
     }
     .nav-title {
         font-size: 1.3rem;
@@ -47,96 +47,100 @@ st.markdown("""
         color: #eff6ff;
         padding: 4px 12px;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 700;
         margin-left: 10px;
-        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
     }
     
-    /* 2. 검색 컨테이너: 깊이감 있는 글래스 디자인 */
+    /* 2. 검색 컨테이너 */
     .search-container {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(148, 163, 184, 0.1);
-        border-radius: 20px;
-        padding: 28px;
-        margin-bottom: 28px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 18px;
+        padding: 22px 26px;
+        margin-bottom: 24px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     
-    /* 버튼: 강력한 사이버 블루 그라데이션 및 호버 효과 */
+    /* 실행 버튼 네온 그라데이션 */
     .stButton button {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         color: #ffffff;
         border: none;
         border-radius: 10px;
         font-weight: 700;
         font-size: 0.95rem;
+        height: 42px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(29, 78, 216, 0.3);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
     }
     .stButton button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.7);
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
     }
     
-    /* 3. 리포트 본문 카드: 고급스러운 서식 */
+    /* 3. 리포트 본문 카드 */
     .report-card-pro {
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid rgba(148, 163, 184, 0.1);
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(59, 130, 246, 0.2);
         border-radius: 18px;
-        padding: 30px;
+        padding: 28px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
     .report-card-pro h1, .report-card-pro h2, .report-card-pro h3 {
-        color: #60a5fa; /* 제목에 사이버 블루 포인트 */
+        color: #60a5fa;
         font-weight: 700;
     }
     
-    /* 4. 🌟 대폭 개선된 '검증된 신뢰 출처 근거 카드' (사이버 프로 스타일) */
+    /* 4. 🌟 초강력 동적 네온 글로우 출처 카드 */
     .source-card-modern {
-        background: linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(10, 15, 25, 0.95) 100%);
-        border: 1px solid rgba(59, 130, 246, 0.15);
-        border-left: 4px solid #1d4ed8; /* 왼쪽 포인트 바 */
-        border-radius: 12px;
-        padding: 20px 24px;
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 15, 25, 0.98) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-left: 5px solid #3b82f6;
+        border-radius: 14px;
+        padding: 18px 20px;
         margin-bottom: 16px;
         height: 145px !important;
         max-height: 145px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: all 0.3s ease;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
+    /* 마우스 호버 시 확 살아나는 블루 네온 글로우 효과 */
     .source-card-modern:hover {
-        transform: translateY(-5px) scale(1.01);
-        border-color: rgba(96, 165, 250, 0.6);
-        border-left: 4px solid #60a5fa;
-        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+        transform: translateY(-6px) scale(1.015);
+        border-color: #60a5fa;
+        border-left: 5px solid #60a5fa;
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        box-shadow: 0 12px 35px rgba(59, 130, 246, 0.45);
     }
     .source-card-modern p {
         color: #94a3b8;
-        font-size: 0.88rem;
-        line-height: 1.5;
-        margin: 6px 0;
+        font-size: 0.84rem;
+        line-height: 1.45;
+        margin: 4px 0;
         -webkit-line-clamp: 2;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    /* 신뢰도 칩 프로페셔널 디자인 */
     .source-card-modern .score-chip {
-        background-color: rgba(16, 185, 129, 0.1);
+        background-color: rgba(16, 185, 129, 0.15);
         color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        padding: 3px 12px;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        padding: 3px 10px;
         border-radius: 20px;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        text-shadow: 0 0 5px rgba(52, 211, 153, 0.5);
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -168,7 +172,7 @@ def run_docuscout(query_text):
         query=auto_keyword,
         search_depth="advanced",
         topic="news",
-        max_results=5,
+        max_results=6,
         exclude_domains=[
             "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"
         ]
@@ -206,8 +210,8 @@ st.markdown("""
             <span class="badge-pro">AI Intelligence</span>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
-            <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Dashboard</span>
-            <span style="color: #34d399; font-size: 0.85rem; font-weight: 500;">Live Mode</span>
+            <span style="color: #60a5fa; font-size: 0.85rem; font-weight: 600;">Dashboard</span>
+            <span style="color: #34d399; font-size: 0.8rem; font-weight: 500;">Live Mode</span>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -217,10 +221,10 @@ st.markdown("""
 # =====================================================================
 st.markdown("""
     <div class="search-container">
-        <div style="font-weight: 700; font-size: 1.1rem; color: #ffffff; margin-bottom: 12px;">AI Research Agent Query</div>
+        <div style="font-weight: 700; font-size: 1.05rem; color: #ffffff; margin-bottom: 10px;">AI Research Agent Query</div>
 """, unsafe_allow_html=True)
 
-col_s1, col_s2 = st.columns([5, 1])
+col_s1, col_s2 = st.columns([6, 1])
 with col_s1:
     user_query = st.text_input("질의어 입력", placeholder="예: 2026년 AI 반도체 시장 경쟁 구도", label_visibility="collapsed")
 with col_s2:
@@ -254,15 +258,14 @@ if submit_btn:
             progress_bar.empty()
 
             st.markdown(f"""
-                <div style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; color: #34d399; font-weight: 600;">
+                <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; color: #34d399; font-weight: 600; font-size: 0.9rem; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);">
                     최신 탐색 완료! (추출 검색어: {auto_keyword})
                 </div>
             """, unsafe_allow_html=True)
 
-            col_main, col_sub = st.columns([2, 1])
+            col_main, col_sub = st.columns([2.2, 1])
 
             with col_main:
-                # 리포트 카드 디자인 적용
                 st.markdown('<div class="report-card-pro">', unsafe_allow_html=True)
                 st.markdown(report_content)
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -270,18 +273,17 @@ if submit_btn:
             with col_sub:
                 st.markdown("### 신뢰도 분석")
                 with st.container(border=True):
-                    st.markdown("##### 평균 신뢰도: <span style='color:#34d399; text-shadow:0 0 5px rgba(52, 211, 153, 0.5);'>94.2%</span>", unsafe_allow_html=True)
+                    st.markdown("##### 평균 신뢰도: <span style='color:#34d399; text-shadow:0 0 8px rgba(52, 211, 153, 0.6);'>94.2%</span>", unsafe_allow_html=True)
                     st.progress(94)
 
                 st.markdown("### 후속 리서치")
                 with st.container(border=True):
                     st.markdown(followup_content)
 
-            # 🌟 사이버 프로 디자인이 적용된 '검증된 신뢰 출처 근거 카드' 섹션
+            # 🌟 3열 그리드 네온 글로우 근거 자료 카드
             st.markdown("---")
             st.markdown("### 검증된 신뢰 출처 근거 자료")
             
-            # 한 줄에 카드 3개가 나오도록 레이아웃 (축소했을 때도 보기 좋음)
             for i in range(0, len(sources), 3):
                 col1, col2, col3 = st.columns(3)
                 cols = [col1, col2, col3]
@@ -296,14 +298,14 @@ if submit_btn:
                             st.markdown(f"""
                                 <div class="source-card-modern">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div style="display: flex; align-items: center; gap: 8px; max-width: 70%;">
-                                            <span style="background-color: #1d4ed8; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">#{i+j+1}</span>
-                                            <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+                                        <div style="display: flex; align-items: center; gap: 8px; max-width: 68%;">
+                                            <span style="background-color: #2563eb; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);">#{i+j+1}</span>
+                                            <span style="font-weight: 600; color: #f8fafc; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
                                         </div>
                                         <span class="score-chip">신뢰도 {score}%</span>
                                     </div>
                                     <p>{clean_content}</p>
-                                    <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.83rem; font-weight: 500;">원문 보러가기 →</a>
+                                    <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.8rem; font-weight: 600; text-shadow: 0 0 5px rgba(96, 165, 250, 0.3);">원문 보러가기 →</a>
                                 </div>
                             """, unsafe_allow_html=True)
     else:
