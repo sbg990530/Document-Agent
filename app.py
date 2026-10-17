@@ -85,26 +85,31 @@ st.markdown("""
         background-color: #111827;
         border: 1px solid #1f2937;
         border-radius: 14px;
-        padding: 18px;
+        padding: 16px 20px;
         margin-bottom: 12px;
         transition: transform 0.2s ease, border-color 0.2s ease;
         
-        height: 160px; /* 모든 카드 높이 통일 */
+        /* 💥 높이를 145px로 확실하게 고정하고 넘치는 건 무조건 숨김 */
+        height: 145px !important;
+        max-height: 145px !important;
+        overflow: hidden !important;
+        position: relative;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* 요소들을 상/하로 균등 배치 */
+        justify-content: space-between;
         box-sizing: border-box;
     }
     .source-card-dark p {
         color: #94a3b8;
-        font-size: 0.88rem;
-        line-height: 1.4;
-        margin: 6px 0;
+        font-size: 0.85rem;
+        line-height: 1.35;
+        margin: 4px 0;
         
+        /* 💥 2줄까지만 허용하고 나머지는 철저히 숨김 */
         display: -webkit-box;
-        -webkit-line-clamp: 2; /* 2줄로 제한하여 버튼과 겹침 방지 */
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        overflow: hidden;
+        overflow: hidden !important;
         text-overflow: ellipsis;
     }
     .source-card-dark:hover {
@@ -282,13 +287,17 @@ if submit_btn:
             st.markdown("### 🔗 검증된 신뢰 출처 근거 자료")
             for idx, src in enumerate(sources, 1):
                 score = 92 + (idx * 2) % 7
+                
+                # 💥 본문 내용 중 줄바꿈 및 불필요한 공백을 제거하여 레이아웃 깨짐 방지
+                clean_content = src['content'].replace('\n', ' ').replace('\r', ' ').strip()
+                
                 st.markdown(f"""
                     <div class="source-card-dark">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: 600; color: #f8fafc; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">근거 카드 #{idx} : {src['title']}</span>
                             <span style="background-color: #1e3a8a; color: #bfdbfe; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">신뢰도 {score}%</span>
                         </div>
-                        <p>{src['content']}</p>
+                        <p>{clean_content}</p>
                         <div>
                             <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">🔗 원문 보러가기 →</a>
                         </div>
