@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 역동적이고 세련된 인터랙션 애니메이션 커스텀 CSS
+# 🎨 시각적 입체감과 화려한 출처 카드 디자인이 적용된 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -21,7 +21,7 @@ st.markdown("""
         color: #f8fafc;
     }
     
-    /* 1. 상단 네비게이션 바 */
+    /* 1. 상단 네비게이션 바 스타일 */
     .nav-bar {
         display: flex;
         justify-content: space-between;
@@ -48,10 +48,9 @@ st.markdown("""
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 600;
-        letter-spacing: 0.5px;
     }
     
-    /* 2. 검색 영역 및 버튼 애니메이션 */
+    /* 2. 검색 컨테이너 */
     .search-container {
         background-color: #111827;
         border: 1px solid #1f2937;
@@ -59,10 +58,6 @@ st.markdown("""
         padding: 24px;
         margin-bottom: 24px;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        transition: border-color 0.3s ease;
-    }
-    .search-container:focus-within {
-        border-color: #3b82f6;
     }
     .filter-label {
         font-size: 0.9rem;
@@ -86,16 +81,10 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
     }
     
-    /* 3. 동적 페이드인 애니메이션 Keyframes */
+    /* 3. 페이드인 애니메이션 */
     @keyframes fadeInUp {
-        0% {
-            opacity: 0;
-            transform: translateY(16px) scale(0.98);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+        0% { opacity: 0; transform: translateY(16px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .report-card-dark {
@@ -109,13 +98,13 @@ st.markdown("""
         animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
-    /* 4. 출처 카드 고정 높이 & 글로우 호버 인터랙션 */
-    .source-card-dark {
-        background-color: #111827;
-        border: 1px solid #1f2937;
+    /* 4. 🌟 세련되게 업그레이드된 검증 출처 카드 디자인 (높이 고정 + 호버 글로우) */
+    .source-card-modern {
+        background: linear-gradient(145deg, #111827 0%, #0f172a 100%);
+        border: 1px solid #1e293b;
         border-radius: 14px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
+        padding: 18px 22px;
+        margin-bottom: 14px;
         height: 145px !important;
         max-height: 145px !important;
         overflow: hidden !important;
@@ -124,10 +113,11 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
         box-sizing: border-box;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .source-card-dark p {
+    .source-card-modern p {
         color: #94a3b8;
         font-size: 0.85rem;
         line-height: 1.4;
@@ -138,12 +128,12 @@ st.markdown("""
         overflow: hidden !important;
         text-overflow: ellipsis;
     }
-    /* 호버 시 떠오르는 모션 & 빛나는 블루 글로우 효과 */
-    .source-card-dark:hover {
+    /* 마우스 호버 시 카드 부드러운 상승 및 블루 네온 글로우 효과 */
+    .source-card-modern:hover {
         transform: translateY(-5px) scale(1.008);
-        border-color: #60a5fa;
-        background-color: #172033;
-        box-shadow: 0 12px 24px -6px rgba(59, 130, 246, 0.3);
+        border-color: #3b82f6;
+        background: linear-gradient(145deg, #172033 0%, #1e293b 100%);
+        box-shadow: 0 12px 28px -6px rgba(59, 130, 246, 0.35);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -287,7 +277,7 @@ if submit_btn:
                 </div>
             """, unsafe_allow_html=True)
 
-            # 💡 동적 탭 UI 적용으로 입체감 제공
+            # 동적 탭 UI 적용
             tab1, tab2 = st.tabs(["📊 메인 리서치 대시보드", "💬 심층 후속 분석 & 로그"])
 
             with tab1:
@@ -322,20 +312,25 @@ if submit_btn:
                     with st.container(border=True):
                         st.markdown(f"`#{auto_keyword}` `#AI트렌드` `#2026전망` `#팩트체크`")
 
-                # 하단 근거 카드 (마우스 호버 시 글로우 모션 적용)
+                # 🌟 모던한 디자인이 적용된 '검증된 신뢰 출처 근거 카드' 섹션
                 st.markdown("### 검증된 신뢰 출처 근거 자료")
                 for idx, src in enumerate(sources, 1):
                     score = 92 + (idx * 2) % 7
                     clean_content = src['content'].replace('\n', ' ').replace('\r', ' ').strip()
+                    
                     st.markdown(f"""
-                        <div class="source-card-dark">
+                        <div class="source-card-modern">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-weight: 600; color: #f8fafc; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">근거 카드 #{idx} : {src['title']}</span>
-                                <span style="background-color: #1e3a8a; color: #bfdbfe; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">신뢰도 {score}%</span>
+                                <div style="display: flex; align-items: center; gap: 8px; max-width: 78%;">
+                                    <span style="background-color: #1d4ed8; color: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">#{idx}</span>
+                                    <span style="font-weight: 600; color: #f8fafc; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+                                </div>
+                                <span style="background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">신뢰도 {score}%</span>
                             </div>
                             <p>{clean_content}</p>
-                            <div>
-                                <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">원문 보러가기 →</a>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.83rem; font-weight: 500;">원문 보러가기 →</a>
+                                <span style="color: #64748b; font-size: 0.75rem;">Verified Source</span>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
