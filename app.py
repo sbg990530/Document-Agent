@@ -147,19 +147,18 @@ if "selected_category" not in st.session_state:
     st.session_state.selected_category = "전체 (All)"
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (시점 연도 일치 검색 및 한국어 번역 정제)
+# ⚙️ AI 파이프라인 (과거 연도 정밀 타겟팅 및 무관한 기사 필터링)
 # =====================================================================
 def run_docuscout(query_text):
-    # 사용자 질문 속 연도 감지 (예: 2020년 등)
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     if year_match:
         target_period = year_match.group(0)
     else:
         target_period = datetime.now().strftime("%Y년 %m월")
 
-    # 🌟 검색 쿼리 생성 시 대상 연도(target_period)를 명시하여 과거 자료 집중 수집
+    # 🌟 검색어 생성 시 주제와 연도가 명확히 결합되도록 프롬프트 강화
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})의 자료를 정확히 타겟팅할 수 있도록 해당 연도를 포함한 핵심 검색 키워드 2~3개를 조합하여 검색어만 출력하세요. (예: 2020년 e스포츠 시장 규모)"),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 주제를 반영하여 검색 정확도를 높일 수 있는 검색어 1개만 정확하게 출력하세요. (예: 2020년 e스포츠 시장 규모 전망)"),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -167,20 +166,30 @@ def run_docuscout(query_text):
     search_response = tavily_client.search(
         query=auto_keyword,
         search_depth="advanced",
-        topic="news",
-        max_results=6,
+        topic="general", # general 토픽으로 설정하여 과거 웹 문서 및 보고서까지 폭넓게 탐색
+        max_results=10,
         exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"]
     )
-    collected_sources = search_response.get('results', [])
+    raw_sources = search_response.get('results', [])
+
+    # 🌟 자동차, 포르쉐, 베팅 등 질문 주제(e스포츠 등)와 무관한 잡음 기사 필터링
+    filtered_sources = []
+    noise_keywords = ["포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러"]
+    for src in raw_sources:
+        combined_text = src['title'] + " " + src['content']
+        if not any(nk in combined_text for nk in noise_keywords):
+            filtered_sources.append(src)
+
+    collected_sources = filtered_sources[:6] if filtered_sources else raw_sources[:6]
 
     if not collected_sources:
         return auto_keyword, None, None, None
 
-    # 수집된 모든 출처의 제목과 내용을 지정된 연도(시점) 맥락에 맞춰 한국어로 번역 및 정제
+    # 수집된 출처 한국어 번역 및 요약 정제
     refined_sources = []
     for result in collected_sources:
         translate_prompt = ChatPromptTemplate.from_messages([
-            ("system", f"제공된 문서가 지정된 시점({target_period})의 상황을 반영하는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+            ("system", f"제공된 문서를 분석하여 지정된 시점({target_period})의 상황에 맞는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
             ("user", f"원문 제목: {result['title']}\n원문 내용: {result['content']}")
         ])
         trans_res = (translate_prompt | llm).invoke({}).content
