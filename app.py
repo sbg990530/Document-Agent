@@ -339,7 +339,7 @@ if st.session_state.report_data:
 
         if st.session_state.sources_data:
             st.markdown("---")
-            st.markdown("#### 📚 검증된 신뢰 출처 근거 자료 (가로 3열 Grid)")
+            st.markdown("#### 📚 검증된 신뢰 출처 근거 자료")
             
             sources = st.session_state.sources_data
             for i in range(0, len(sources), 3):
