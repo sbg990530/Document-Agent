@@ -282,16 +282,16 @@ if submit_btn:
             st.markdown("### 🔗 검증된 신뢰 출처 근거 자료")
             for idx, src in enumerate(sources, 1):
                 score = 92 + (idx * 2) % 7
-                
-                # 💥 HTML 태그가 정상 작동하도록 unsafe_allow_html=True를 반드시 포함합니다
                 st.markdown(f"""
                     <div class="source-card-dark">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span style="font-weight: 600; color: #f8fafc; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">근거 카드 #{idx} : {src['title']}</span>
-                            <span style="background-color: #1e3a8a; color: #bfdbfe; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">신뢰도 {score}%</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600; color: #f8fafc; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">근거 카드 #{idx} : {src['title']}</span>
+                            <span style="background-color: #1e3a8a; color: #bfdbfe; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">신뢰도 {score}%</span>
                         </div>
                         <p>{src['content']}</p>
-                        <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500; position: absolute; bottom: 16px; left: 18px;">🔗 원문 보러가기 →</a>
+                        <div>
+                            <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">🔗 원문 보러가기 →</a>
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
     else:
