@@ -72,6 +72,18 @@ st.markdown("""
         border-color: #60a5fa;
         color: #ffffff;
     }
+    /* 💥 1. 카드가 나타날 때 아래에서 위로 자연스럽게 오르는 페이드인 애니메이션 */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .report-card-dark {
         background-color: #111827;
         border: 1px solid #1f2937;
@@ -80,14 +92,18 @@ st.markdown("""
         margin-bottom: 16px;
         color: #f1f5f9;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        
+        /* 애니메이션 적용 */
+        animation: fadeInUp 0.4s ease-out forwards;
     }
+
     .source-card-dark {
         background-color: #111827;
         border: 1px solid #1f2937;
         border-radius: 14px;
         padding: 16px 20px;
         margin-bottom: 12px;
-        transition: transform 0.2s ease, border-color 0.2s ease;
+        
         height: 145px !important;
         max-height: 145px !important;
         overflow: hidden !important;
@@ -96,7 +112,12 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
         box-sizing: border-box;
+
+        /* 애니메이션 및 트랜지션 적용 */
+        animation: fadeInUp 0.4s ease-out forwards;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .source-card-dark p {
         color: #94a3b8;
         font-size: 0.85rem;
@@ -108,12 +129,13 @@ st.markdown("""
         overflow: hidden !important;
         text-overflow: ellipsis;
     }
+
+    /* 💥 2. 마우스 호버(Hover) 시 살짝 떠오르며 블루 글로우(빛) 효과 강화 */
     .source-card-dark:hover {
-        transform: translateY(-2px);
+        transform: translateY(-4px) scale(1.005);
         border-color: #3b82f6;
+        box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.25);
     }
-    </style>
-""", unsafe_allow_html=True)
 
 # API 키 설정
 try:
