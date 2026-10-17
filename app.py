@@ -89,18 +89,20 @@ st.markdown("""
         margin-bottom: 12px;
         transition: transform 0.2s ease, border-color 0.2s ease;
         
-        /* 💥 추가: 박스 높이 고정 및 넘침 방지 */
-        height: 170px;
-        overflow: hidden;
-        position: relative;
+        height: 160px; /* 모든 카드 높이 통일 */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* 요소들을 상/하로 균등 배치 */
+        box-sizing: border-box;
     }
     .source-card-dark p {
         color: #94a3b8;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         line-height: 1.4;
-        margin-bottom: 8px;
+        margin: 6px 0;
+        
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2; /* 2줄로 제한하여 버튼과 겹침 방지 */
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
