@@ -350,7 +350,7 @@ st.markdown(f"""
                         </div>
                         <p>{clean_content}</p>
                         <div>
-                            <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">원문 보러가기 →</a>
+                            <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">원문 보러가기 </a>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
