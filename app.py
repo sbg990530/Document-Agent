@@ -13,17 +13,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 스크린샷과 100% 동일한 대시보드 커스텀 CSS
+# 🎨 탭 깨짐 현상과 레이아웃 정렬을 완벽히 잡은 최종 커스텀 CSS
 st.markdown("""
     <style>
-    /* 전체 앱 배경 */
     .stApp {
         background: #070913;
         color: #f1f5f9;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* 1. 상단 네비게이션 바 */
+    /* 1. 상단 네비바 */
     .top-navbar {
         display: flex;
         justify-content: space-between;
@@ -31,8 +30,8 @@ st.markdown("""
         background: rgba(13, 18, 30, 0.9);
         padding: 12px 28px;
         border-radius: 16px;
-        border: 1px solid rgba(59, 130, 246, 0.15);
-        margin-bottom: 24px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        margin-bottom: 20px;
         backdrop-filter: blur(12px);
     }
     .brand-logo {
@@ -54,15 +53,6 @@ st.markdown("""
         font-size: 1rem;
         box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
     }
-    .badge-pro {
-        background: rgba(37, 99, 235, 0.15);
-        color: #60a5fa;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
     .status-chip {
         background: rgba(16, 185, 129, 0.15);
         color: #34d399;
@@ -76,7 +66,30 @@ st.markdown("""
         gap: 6px;
     }
 
-    /* 2. 검색 카드 컨테이너 */
+    /* 2. Streamlit 기본 st.tabs 스타일을 모던하게 개편 */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background-color: rgba(13, 18, 30, 0.6);
+        padding: 6px;
+        border-radius: 14px;
+        border: 1px solid rgba(59, 130, 246, 0.15);
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 38px;
+        background-color: transparent;
+        border-radius: 10px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 0 20px;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+    }
+
+    /* 3. 검색 카드 컨테이너 */
     .search-card {
         background: rgba(13, 18, 30, 0.8);
         border: 1px solid rgba(59, 130, 246, 0.2);
@@ -116,23 +129,6 @@ st.markdown("""
         box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55) !important;
     }
 
-    /* 3. 파이프라인 진행 상태 */
-    .pipeline-box {
-        background: rgba(13, 18, 30, 0.9);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        border-radius: 12px;
-        padding: 14px 20px;
-        margin-bottom: 20px;
-    }
-    .pipeline-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 700;
-        color: #34d399;
-        font-size: 0.9rem;
-    }
-
     /* 4. 우측 사이드바 패널 */
     .side-card {
         background: rgba(13, 18, 30, 0.8);
@@ -140,6 +136,7 @@ st.markdown("""
         border-radius: 14px;
         padding: 18px;
         margin-bottom: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     .side-title {
         font-size: 0.9rem;
@@ -167,18 +164,18 @@ st.markdown("""
         padding: 10px 0;
     }
     .donut-ring {
-        width: 110px;
-        height: 110px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
         background: conic-gradient(#10b981 0% 58%, #3b82f6 58% 92%, #1e293b 92% 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
     .donut-hole {
-        width: 78px;
-        height: 78px;
+        width: 70px;
+        height: 70px;
         background: #0d121e;
         border-radius: 50%;
     }
@@ -215,17 +212,8 @@ st.markdown("""
         font-size: 0.75rem;
         color: #60a5fa;
         line-height: 1.8;
-        max-height: 120px;
+        max-height: 110px;
         overflow-y: auto;
-    }
-
-    /* 5. 아코디언 Expander 커스텀 */
-    .streamlit-expanderHeader {
-        background: rgba(13, 18, 30, 0.85) !important;
-        border: 1px solid rgba(59, 130, 246, 0.2) !important;
-        border-radius: 12px !important;
-        color: #f8fafc !important;
-        font-weight: 700 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -291,7 +279,7 @@ st.markdown("""
         <div class="brand-logo">
             <div class="brand-icon">🔍</div>
             <span>DocuScout</span>
-            <span class="badge-pro">AI Pro 3.1</span>
+            <span style="background: rgba(37, 99, 235, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1</span>
         </div>
         <div class="status-chip">
             <span>●</span> 에이전트 준비완료
@@ -341,27 +329,25 @@ if submit_btn:
         status_box = st.empty()
 
         status_box.markdown("""
-            <div class="pipeline-box">
-                <div class="pipeline-header">
-                    <span>🔄 탐색 완료! 최신 보고서 업데이트됨</span>
-                    <span>100%</span>
-                </div>
+            <div style="background: rgba(13, 18, 30, 0.9); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; font-weight: 700; color: #34d399; font-size: 0.9rem;">
+                🔄 탐색 완료! 최신 보고서가 업데이트되었습니다. (100%)
             </div>
         """, unsafe_allow_html=True)
         progress_bar.progress(100)
 
         auto_keyword, report_content, followup_content, sources = run_docuscout(user_query)
 
-        # 🌟 상단 탭 구현 (스크린샷 중앙 탭과 동일)
+        # 🌟 상단 중앙으로 정렬된 모던 탭 시스템
         tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
 
         # -------------------------------------------------------------
         # TAB 1: 📊 [대시보드] 메인 화면
         # -------------------------------------------------------------
         with tab_dash:
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             col_left, col_right = st.columns([2.2, 1])
 
-            # 좌측: 3단계 반응형 아코디언 카드 패널
+            # 좌측: AI 리포트 및 아코디언 패널
             with col_left:
                 col_th1, col_th2 = st.columns([3, 1.2])
                 with col_th1:
@@ -375,12 +361,10 @@ if submit_btn:
                         use_container_width=True
                     )
 
-                # 아코디언 카드 1: 핵심 요약
                 with st.expander("🌀 핵심 요약 및 2026 트렌드 하이라이트", expanded=True):
                     st.markdown(f"**추출 키워드:** `{auto_keyword}`")
                     st.markdown(report_content)
 
-                # 아코디언 카드 2: 주요 수집 출처 검증
                 with st.expander("⚖️ 주요 수집 출처 비교 및 검증 데이터", expanded=True):
                     if sources:
                         c1, c2 = st.columns(2)
@@ -392,13 +376,11 @@ if submit_btn:
                                 st.markdown(f"**{sources[1]['title'][:25]}...**")
                                 st.caption(f"신뢰도 94% | {sources[1]['content'][:60]}...")
 
-                # 아코디언 카드 3: 액션 플랜
                 with st.expander("💡 DocuScout 액션 플랜 및 전략적 시사점", expanded=True):
                     st.markdown(followup_content)
 
-            # 우측: 스크린샷과 동일한 3단 사이드바 (차트 + 키워드 + 로그)
+            # 우측: 3단 사이드바 (도넛 차트 + 키워드 태그 + 실시간 로그)
             with col_right:
-                # 1. 출처 신뢰도 분석 지표 (도넛 차트)
                 st.markdown("""
                     <div class="side-card">
                         <div class="side-title">
@@ -423,7 +405,6 @@ if submit_btn:
                     </div>
                 """, unsafe_allow_html=True)
 
-                # 2. 연관 핵심 키워드 태그
                 st.markdown("""
                     <div class="side-card">
                         <div class="side-title">🏷️ 연관 핵심 키워드 태그</div>
@@ -438,7 +419,6 @@ if submit_btn:
                     </div>
                 """, unsafe_allow_html=True)
 
-                # 3. 실시간 탐색 로그
                 now_t = datetime.now().strftime("%H:%M:%S")
                 st.markdown(f"""
                     <div class="side-card">
