@@ -216,7 +216,7 @@ def run_docuscout(query_text):
 st.markdown("""
     <div class="nav-bar">
         <div class="nav-title">
-            <span>🛡️ DocuScout</span>
+            <span> DocuScout</span>
             <span class="badge-pro">AI Pro 3.1</span>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
