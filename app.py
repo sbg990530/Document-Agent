@@ -216,7 +216,7 @@ def run_docuscout(query_text):
 st.markdown("""
     <div class="nav-bar">
         <div class="nav-title">
-            <span>&#128737; DocuScout</span>
+            <span>DocuScout</span>
             <span class="badge-pro">AI Pro 3.1</span>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
@@ -232,7 +232,7 @@ st.markdown("""
 st.markdown("""
     <div class="search-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <span style="font-weight: 600; font-size: 1.05rem; color: #f8fafc;">🧭 AI 리서치 질의어 입력</span>
+            <span style="font-weight: 600; font-size: 1.05rem; color: #f8fafc;">AI 리서치 질의어 입력</span>
             <span style="font-size: 0.85rem; color: #94a3b8;">실시간 웹 크롤링 + LLM 팩트체크 결합 모드</span>
         </div>
 """, unsafe_allow_html=True)
@@ -241,7 +241,7 @@ col_s1, col_s2 = st.columns([5, 1])
 with col_s1:
     user_query = st.text_input("질의어 입력", placeholder="예: 2026년 반도체 산업 전망 및 AI 시장 경쟁 구도 분석", label_visibility="collapsed")
 with col_s2:
-    submit_btn = st.button("🚀 스카우트 실행", type="primary", use_container_width=True)
+    submit_btn = st.button("스카우트 실행", type="primary", use_container_width=True) # 🚀 제거
 
 st.markdown("<div class='filter-label' style='margin-top: 15px;'>카테고리 필터:</div>", unsafe_allow_html=True)
 f_col1, f_col2, f_col3, f_col4, f_col5 = st.columns(5)
@@ -284,23 +284,22 @@ if submit_btn:
             status_box.empty()
             progress_bar.empty()
 
-            st.markdown(f"""
+st.markdown(f"""
                 <div style="background-color: #111827; border: 1px solid #1f2937; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #34d399; font-weight: 600;">✅ 최신 탐색 완료! (추출 검색어: {auto_keyword})</span>
+                    <span style="color: #34d399; font-weight: 600;">[완료] 최신 탐색 완료! (추출 검색어: {auto_keyword})</span>
                     <span style="background-color: #1f2937; color: #94a3b8; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem;">100%</span>
                 </div>
             """, unsafe_allow_html=True)
 
-            # 대시보드 메인 레이아웃 (좌측: 리포트 / 우측: 분석 지표 및 로그)
             col_main, col_sub = st.columns([2, 1])
 
             with col_main:
                 col_h1, col_h2 = st.columns([3, 1])
                 with col_h1:
-                    st.markdown("### 📋 AI 에이전트 종합 리포트")
+                    st.markdown("### AI 에이전트 종합 리포트") # 📋 제거
                 with col_h2:
                     st.download_button(
-                        label="📥 내보내기",
+                        label="리포트 내보내기", # 📥 제거
                         data=report_content,
                         file_name=f"DocuScout_Report_{datetime.now().strftime('%Y%m%d')}.txt",
                         mime="text/plain",
@@ -311,35 +310,35 @@ if submit_btn:
                 st.markdown(report_content)
                 st.markdown('</div>', unsafe_allow_html=True)
 
-                st.markdown("### 💬 추천 후속 심층 리서치")
+                st.markdown("### 추천 후속 심층 리서치") # 💬 제거
                 with st.container(border=True):
                     st.markdown(followup_content)
 
             with col_sub:
-                st.markdown("### 📈 출처 신뢰도 분석")
+                st.markdown("### 출처 신뢰도 분석") # 📈 제거
                 with st.container(border=True):
                     st.markdown("##### 평균 신뢰도: <span style='color:#34d399;'>94.2%</span>", unsafe_allow_html=True)
                     st.progress(94)
                     st.caption("• 학술/공식 보고서 비중: 62%")
                     st.caption("• IT/경제 전문 언론사 비중: 38%")
 
-                st.markdown("### 🏷️ 연관 핵심 키워드")
+                st.markdown("### 연관 핵심 키워드") # 🏷️ 제거
                 with st.container(border=True):
                     st.markdown(f"`#{auto_keyword}` `#AI트렌드` `#2026전망` `#팩트체크`")
 
-                st.markdown("### 💻 실시간 탐색 로그")
+                st.markdown("### 실시간 탐색 로그") # 💻 제거
                 with st.container(border=True):
                     current_t = datetime.now().strftime("%H:%M:%S")
                     st.markdown(f"""
                         <div style='font-size: 0.8rem; color: #94a3b8; font-family: monospace;'>
                         [{current_t}] 키워드 정규화 완료<br>
-                        [{current_t}] Tavily 뉴스 크롤링 (5건)<br>
+                        [{current_t}] Tavily 뉴스 크롤링 완료<br>
                         [{current_t}] LLM 종합 리포트 생성 완료
                         </div>
                     """, unsafe_allow_html=True)
 
-            # 하단 신뢰 출처 카드 영역 (동일한 높이 및 텍스트 2줄 제한 적용)
-            st.markdown("### 🔗 검증된 신뢰 출처 근거 자료")
+            # 출처 카드 부분
+            st.markdown("### 검증된 신뢰 출처 근거 자료") # 🔗 제거
             for idx, src in enumerate(sources, 1):
                 score = 92 + (idx * 2) % 7
                 clean_content = src['content'].replace('\n', ' ').replace('\r', ' ').strip()
@@ -351,7 +350,7 @@ if submit_btn:
                         </div>
                         <p>{clean_content}</p>
                         <div>
-                            <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">🔗 원문 보러가기 →</a>
+                            <a href="{src['url']}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 500;">원문 보러가기 →</a>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
