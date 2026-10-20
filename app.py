@@ -203,7 +203,7 @@ if "timeline_logs" not in st.session_state:
 # ⚙️ AI 파이프라인 (KST 현재 시간 적용)
 # =====================================================================
 def add_timeline_log(step_title, step_desc):
-    now_str = datetime.now(KST).strftime("%H:%M:%S")  # 👈 KST 기준으로 정확한 현재 시각 반영
+    now_str = datetime.now(KST).strftime("%H:%M:%S")
     st.session_state.timeline_logs.append({
         "time": now_str,
         "title": step_title,
@@ -432,7 +432,7 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    # 2) 실시간 라이브 탐색 탭 (접이식 박스 적용 및 KST 타임라인 적용 완료)
+    # 2) 실시간 라이브 탐색 탭 (타임라인 & Raw 데이터 모두 접이식 및 최신순 정렬 적용)
     with tab_live:
         st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
         
@@ -454,13 +454,16 @@ if st.session_state.report_data:
                         st.markdown(f"⏱️ **`{log['time']}`** &nbsp;|&nbsp; **{log['title']}**")
                         st.caption(log['desc'])
 
+        # 🌟 Raw 데이터 목록 접이식 박스 및 최신 수집 자료가 맨 위로 오도록 역순 정렬(reversed) 적용
         if st.session_state.sources_data:
-            st.markdown("---")
-            st.markdown(f"#### 📄 누적 수집된 Raw 데이터 목록 (총 {len(st.session_state.sources_data)}건)")
-            for idx, src in enumerate(st.session_state.sources_data, 1):
-                with st.expander(f"📌 [{idx}] {src['title']}", expanded=False):
-                    st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
-                    st.write(src['content'])
+            source_count = len(st.session_state.sources_data)
+            with st.expander(f"📄 누적 수집된 Raw 데이터 목록 히스토리 (총 {source_count}건)", expanded=False):
+                for idx, src in enumerate(reversed(st.session_state.sources_data), 1):
+                    original_idx = source_count - idx + 1
+                    with st.container(border=True):
+                        st.markdown(f"📌 **[{original_idx}] {src['title']}**")
+                        st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
+                        st.write(src['content'])
 
     # 3) 신뢰도 심층 분석 탭
     with tab_audit:
