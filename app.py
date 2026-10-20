@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 깔끔한 CSS
+# 🎨 라이트 아로라 테마 및 확장 박스 UI 커스텀 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -73,6 +73,23 @@ st.markdown("""
         gap: 8px;
     }
 
+    /* 🌟 st.expander (접이식 박스) 크기 및 글자 크기 대폭 확대 */
+    [data-testid="stExpander"] {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(203, 213, 225, 0.8) !important;
+        border-radius: 16px !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.05) !important;
+    }
+    [data-testid="stExpander"] summary p {
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+    }
+    [data-testid="stExpander"] details {
+        padding: 8px !important;
+    }
+
     /* st.form 박스 스타일 단일화 */
     [data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.95) !important;
@@ -98,12 +115,12 @@ st.markdown("""
     /* 리포트 및 본문 글자 크기 가독성 */
     [data-testid="stMarkdownContainer"] p, 
     [data-testid="stMarkdownContainer"] li {
-        font-size: 1.05rem !important;
-        line-height: 1.72 !important;
+        font-size: 1.08rem !important;
+        line-height: 1.75 !important;
         color: #334155 !important;
     }
     [data-testid="stMarkdownContainer"] h4 {
-        font-size: 1.2rem !important;
+        font-size: 1.25rem !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         margin-top: 16px !important;
@@ -143,7 +160,7 @@ st.markdown("""
         border-radius: 16px;
         padding: 18px 20px;
         margin-bottom: 12px;
-        height: 180px !important;
+        height: 190px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -151,8 +168,8 @@ st.markdown("""
     }
     .source-card-modern p {
         color: #475569;
-        font-size: 0.88rem !important;
-        line-height: 1.5 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.55 !important;
         margin: 6px 0;
         -webkit-line-clamp: 3;
         display: -webkit-box;
@@ -432,7 +449,7 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    # 2) 실시간 라이브 탐색 탭 (타임라인 & Raw 데이터 모두 접이식 및 최신순 정렬 적용)
+    # 2) 실시간 라이브 탐색 탭 (확대된 접이식 박스 및 역순 정렬 적용)
     with tab_live:
         st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
         
@@ -445,7 +462,7 @@ if st.session_state.report_data:
                     run_docuscout_pipeline(user_query, is_live_refresh=True)
                     st.rerun()
 
-        # 타임라인 로그 접이식 박스
+        # 타임라인 로그 접이식 박스 (확대된 스타일 적용)
         if st.session_state.timeline_logs:
             log_count = len(st.session_state.timeline_logs)
             with st.expander(f"⏱️ 에이전트 실시간 수집 타임라인 로그 히스토리 (총 {log_count}개 단계)", expanded=False):
@@ -454,7 +471,7 @@ if st.session_state.report_data:
                         st.markdown(f"⏱️ **`{log['time']}`** &nbsp;|&nbsp; **{log['title']}**")
                         st.caption(log['desc'])
 
-        # 🌟 Raw 데이터 목록 접이식 박스 및 최신 수집 자료가 맨 위로 오도록 역순 정렬(reversed) 적용
+        # Raw 데이터 목록 접이식 박스 (확대된 스타일 및 최신순 정렬 적용)
         if st.session_state.sources_data:
             source_count = len(st.session_state.sources_data)
             with st.expander(f"📄 누적 수집된 Raw 데이터 목록 히스토리 (총 {source_count}건)", expanded=False):
