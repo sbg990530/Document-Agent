@@ -72,7 +72,7 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* st.form 박스 스타일 하나로 단일화 */
+    /* st.form 박스 스타일 단일화 */
     [data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
@@ -204,7 +204,7 @@ if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (프롬프트 구문 오류 수정 완료)
+# ⚙️ AI 파이프라인 (무관한 출처 완벽 필터링 강화)
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -214,7 +214,7 @@ def run_docuscout(query_text):
         target_period = datetime.now().strftime("%Y년 %m월")
 
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 주제를 반영하여 검색 정확도를 높일 수 있는 검색어 1개만 정확하게 출력하세요."),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 명사 주제를 명확하게 추출하여 검색어 1개만 정확하게 출력하세요. (예: 2027년 e스포츠 시장 규모 전망)"),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -223,16 +223,31 @@ def run_docuscout(query_text):
         query=auto_keyword,
         search_depth="advanced",
         topic="general",
-        max_results=10,
+        max_results=12,
         exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"]
     )
     raw_sources = search_response.get('results', [])
 
+    # 🌟 스팸/무관한 잡음 기사 검증 필터 목록 대폭 확장
+    noise_keywords = [
+        "포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러",
+        "리플", "도지코인", "시바이누", "비트코인", "암호화폐", "파이코인", "전기자전거", 
+        "카지노", "슬롯", "대리점", "데모", "HTML"
+    ]
+    
+    # 필수 연관 키워드 추출 (예: e스포츠 질문이면 esports/게임 관련 단어 포함 검증)
+    query_core_terms = ["e스포츠", "esports", "게임", "gaming", "시장", "market"]
+
     filtered_sources = []
-    noise_keywords = ["포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러"]
     for src in raw_sources:
-        combined_text = src['title'] + " " + src['content']
-        if not any(nk in combined_text for nk in noise_keywords):
+        combined_text = (src['title'] + " " + src['content']).lower()
+        
+        # 1) 노이즈 키워드 포함 시 탈락
+        if any(nk in combined_text for nk in noise_keywords):
+            continue
+            
+        # 2) 질문의 핵심 주제 단어가 최소 1개 이상 들어있는지 확인
+        if any(term in combined_text for term in query_core_terms):
             filtered_sources.append(src)
 
     collected_sources = filtered_sources[:6] if filtered_sources else raw_sources[:6]
@@ -242,7 +257,6 @@ def run_docuscout(query_text):
 
     refined_sources = []
     for result in collected_sources:
-        # 🌟 LangChain 템플릿 파싱 충돌 방지를 위해 안전한 포맷으로 수정
         translate_prompt = ChatPromptTemplate.from_messages([
             ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 상황에 맞는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
             ("user", "원문 제목: {title}\n원문 내용: {content}")
@@ -317,8 +331,8 @@ with st.form(key="search_form"):
     with col_s1:
         user_query = st.text_input(
             "질의어 입력", 
-            value="2020년 e스포츠 시장 현황은 어땠어?", 
-            placeholder="예: 2020년 e스포츠 시장 현황은 어땠어?", 
+            value="2027년 e스포츠 시장 현황 전망은 어떨 것 같아?", 
+            placeholder="예: 2027년 e스포츠 시장 현황 전망은 어떨 것 같아?", 
             label_visibility="collapsed"
         )
     with col_s2:
