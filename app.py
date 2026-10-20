@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from datetime import datetime
 import streamlit as st
 from tavily import TavilyClient
@@ -14,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 가독성 개선 CSS
+# 🎨 라이트 아로라 테마 및 타임라인 전용 커스텀 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -94,7 +95,7 @@ st.markdown("""
         color: #0f172a !important;
     }
 
-    /* 리포트 및 본문 글자 크기 가독성 향상 */
+    /* 리포트 및 본문 글자 크기 가독성 */
     [data-testid="stMarkdownContainer"] p, 
     [data-testid="stMarkdownContainer"] li {
         font-size: 1.05rem !important;
@@ -107,6 +108,50 @@ st.markdown("""
         color: #1e293b !important;
         margin-top: 16px !important;
         margin-bottom: 8px !important;
+    }
+
+    /* 실시간 타임라인 노드 UI 스타일 디자인 */
+    .timeline-container {
+        border-left: 3px solid #6366f1;
+        padding-left: 20px;
+        margin-left: 10px;
+        margin-bottom: 24px;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 16px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(203, 213, 225, 0.7);
+        border-radius: 12px;
+        padding: 12px 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -28px;
+        top: 16px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+    .timeline-time {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #6366f1;
+        margin-bottom: 4px;
+    }
+    .timeline-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .timeline-desc {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 2px;
     }
 
     /* 버튼 스타일 및 가시성 강제 고정 */
@@ -187,105 +232,127 @@ llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 if "report_data" not in st.session_state:
     st.session_state.report_data = None
 if "sources_data" not in st.session_state:
-    st.session_state.sources_data = None
+    st.session_state.sources_data = []
 if "followup_data" not in st.session_state:
     st.session_state.followup_data = None
 if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
+if "timeline_logs" not in st.session_state:
+    st.session_state.timeline_logs = []
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (통계/시장 전망 타겟팅 강화)
+# ⚙️ AI 파이프라인 (실시간 타임라인 & 라이브 덧붙이기 지원)
 # =====================================================================
-def run_docuscout(query_text):
+def add_timeline_log(step_title, step_desc):
+    now_str = datetime.now().strftime("%H:%M:%S")
+    st.session_state.timeline_logs.append({
+        "time": now_str,
+        "title": step_title,
+        "desc": step_desc
+    })
+
+def run_docuscout_pipeline(query_text, is_live_refresh=False):
+    if not is_live_refresh:
+        st.session_state.timeline_logs = []
+        st.session_state.sources_data = []
+
+    add_timeline_log(
+        "🔄 라이브 최신 데이터 수집 시작" if is_live_refresh else "🎯 1단계: 시점 감지 및 쿼리 생성",
+        "현재 시점 기준 최신 웹 트렌드 감지 중..." if is_live_refresh else "질의어에서 시점을 감지하고 시장 전망 수치 타겟팅 쿼리를 생성 중..."
+    )
+    
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
-    if year_match:
-        target_period = year_match.group(0)
-    else:
-        target_period = datetime.now().strftime("%Y년 %m월")
+    target_period = year_match.group(0) if year_match else datetime.now().strftime("%Y년 %m월")
 
-    # 🌟 단순 개념정의 블로그를 피하고 시장 보고서/통계 수치를 타겟팅하는 검색 쿼리 생성
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 수 있는 검색 키워드를 생성하세요. 단순 정의나 개요문서가 아닌 산업 전망 데이터를 찾도록 '시장 규모 전망' 키워드를 반드시 포함하세요. (예: e스포츠 시장 규모 전망 2027)"),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 수 있는 검색 키워드를 생성하세요."),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
+    st.session_state.auto_keyword = auto_keyword
 
+    add_timeline_log("🔍 키워드 추출 완료", f"타겟팅 검색 키워드: '{auto_keyword}'")
+
+    # Tavily 검색 수행
     search_response = tavily_client.search(
         query=auto_keyword,
         search_depth="advanced",
         topic="general",
-        max_results=12,
+        max_results=15,
         exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki"]
     )
     raw_sources = search_response.get('results', [])
 
-    noise_keywords = [
-        "포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러",
-        "리플", "도지코인", "시바이누", "비트코인", "암호화폐", "파이코인", "전기자전거", 
-        "카지노", "슬롯", "대리점", "데모", "HTML"
-    ]
-    # 단순 정의어("뜻", "개념", "정의")가 포함된 원론적 기사도 제외
-    def_noise_keywords = ["뜻", "정의", "개념", "1~14주차", "강의"]
+    add_timeline_log("🧹 노이즈 기사 필터링", "암호화폐, 스포츠 베팅 및 원론적 정의 기사 제외 중...")
+    
+    noise_keywords = ["포르쉐", "전기차", "슈퍼볼", "베팅", "리플", "도지코인", "비트코인", "암호화폐", "전기자전거", "카지노"]
+    def_noise_keywords = ["뜻", "정의", "개념", "1~14주차"]
 
     filtered_sources = []
     for src in raw_sources:
         combined_text = (src['title'] + " " + src['content']).lower()
-        
-        # 노이즈 단어 체크
         if any(nk in combined_text for nk in noise_keywords):
             continue
-        # 단순 기본 정의어 위주 제목 제거 (전망/통계 기사 위주 선별)
         if any(dnk in src['title'].lower() for dnk in def_noise_keywords):
             continue
-
         filtered_sources.append(src)
 
-    collected_sources = filtered_sources[:6] if filtered_sources else raw_sources[:6]
+    new_collected = filtered_sources[:6] if filtered_sources else raw_sources[:6]
 
-    if not collected_sources:
-        return auto_keyword, None, None, None
+    if new_collected:
+        add_timeline_log("🔄 한국어 요약 및 번역 정제", "수집된 최신 스니펫을 자연스러운 한국어로 정제 중...")
+        
+        refined_new = []
+        for result in new_collected:
+            translate_prompt = ChatPromptTemplate.from_messages([
+                ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 수치 데이터를 반영해 한국어로 요약하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+                ("user", "원문 제목: {title}\n원문 내용: {content}")
+            ])
+            trans_res = (translate_prompt | llm).invoke({
+                "target_period": target_period,
+                "title": result['title'],
+                "content": result['content']
+            }).content
+            
+            title_match = re.search(r'제목:\s*(.+)', trans_res)
+            content_match = re.search(r'내용:\s*([\s\S]+)', trans_res)
+            
+            kr_title = title_match.group(1).strip() if title_match else result['title']
+            kr_content = content_match.group(1).strip() if content_match else result['content']
 
-    refined_sources = []
-    for result in collected_sources:
-        translate_prompt = ChatPromptTemplate.from_messages([
-            ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 수치 데이터 및 산업 전망을 반영하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
-            ("user", "원문 제목: {title}\n원문 내용: {content}")
+            refined_new.append({"title": kr_title, "content": kr_content, "url": result['url']})
+
+        # 기존 출처에 새로 찾아온 최신 출처 덧붙이기 (중복 제외)
+        existing_urls = {s['url'] for s in st.session_state.sources_data}
+        added_count = 0
+        for item in refined_new:
+            if item['url'] not in existing_urls:
+                st.session_state.sources_data.append(item)
+                added_count += 1
+
+        add_timeline_log("✅ 라이브 수집 완료", f"신규 최신 출처 {added_count}건이 타임라인에 추가되었습니다!")
+
+    # 리포트 생성 (최초 탐색이거나 새로고침 시 업데이트)
+    if not st.session_state.report_data or is_live_refresh:
+        add_timeline_log("🤖 AI 종합 리포트 생성", "GPT-4o-mini 기반 심층 리서치 보고서 최종 가공 중...")
+        
+        collected_context = ""
+        for idx, result in enumerate(st.session_state.sources_data[:6], 1):
+            collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
+
+        report_prompt = ChatPromptTemplate.from_messages([
+            ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 상황에 맞춰 목차(1. 개요, 2. 주요 팩트 및 통계, 3. 시사점)에 부합하는 한국어 보고서를 작성하세요."),
+            ("user", "대상 시점: {target_period}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
         ])
-        trans_res = (translate_prompt | llm).invoke({
-            "target_period": target_period,
-            "title": result['title'],
-            "content": result['content']
-        }).content
-        
-        title_match = re.search(r'제목:\s*(.+)', trans_res)
-        content_match = re.search(r'내용:\s*([\s\S]+)', trans_res)
-        
-        kr_title = title_match.group(1).strip() if title_match else result['title']
-        kr_content = content_match.group(1).strip() if content_match else result['content']
+        report_res = (report_prompt | llm).invoke({"target_period": target_period, "context": collected_context, "query": query_text})
+        st.session_state.report_data = report_res.content
 
-        refined_sources.append({
-            "title": kr_title,
-            "content": kr_content,
-            "url": result['url']
-        })
-
-    collected_context = ""
-    for idx, result in enumerate(refined_sources, 1):
-        collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
-
-    report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 시장 전망 수치와 수집 팩트에 맞춰 목차(1. 개요, 2. 주요 팩트 및 통계, 3. 시사점)에 부합하는 한국어 보고서를 작성하세요."),
-        ("user", "대상 시점: {target_period}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
-    ])
-    report_res = (report_prompt | llm).invoke({"target_period": target_period, "context": collected_context, "query": query_text})
-    
-    followup_prompt = ChatPromptTemplate.from_messages([
-        ("system", "리포트 기반 후속 질문 3가지를 한국어 마크다운 불릿으로 작성하세요."),
-        ("user", "주제: {query}\n요약:\n{summary}")
-    ])
-    followup_res = (followup_prompt | llm).invoke({"query": query_text, "summary": report_res.content})
-
-    return auto_keyword, report_res.content, followup_res.content, refined_sources
+        followup_prompt = ChatPromptTemplate.from_messages([
+            ("system", "리포트 기반 후속 질문 3가지를 한국어 마크다운 불릿으로 작성하세요."),
+            ("user", "주제: {query}\n요약:\n{summary}")
+        ])
+        followup_res = (followup_prompt | llm).invoke({"query": query_text, "summary": report_res.content})
+        st.session_state.followup_data = followup_res.content
 
 @st.dialog("📖 검증 출처 원문 상세보기")
 def open_source_modal(src_item, score):
@@ -328,17 +395,12 @@ with st.form(key="search_form"):
     with col_s2:
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
 
-if submit_btn:
-    if user_query:
-        with st.spinner(f"🔄 '{user_query}'에 대한 시점별 맞춤 크롤링 및 한국어 번역/팩트체크 진행 중..."):
-            kw, rep, fol, srcs = run_docuscout(user_query)
-            st.session_state.auto_keyword = kw
-            st.session_state.report_data = rep
-            st.session_state.followup_data = fol
-            st.session_state.sources_data = srcs
+if submit_btn and user_query:
+    with st.spinner("🔄 AI 에이전트가 탐색 파이프라인을 실시간 실행 중입니다..."):
+        run_docuscout_pipeline(user_query, is_live_refresh=False)
 
 # =====================================================================
-# 3. 결과 출력 및 st.tabs 네비게이션 시스템
+# 3. 결과 출력 및 탭 시스템 (실시간 덧붙이기 라이브 버튼 추가)
 # =====================================================================
 if st.session_state.report_data:
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
@@ -380,7 +442,7 @@ if st.session_state.report_data:
 
         if st.session_state.sources_data:
             st.markdown("---")
-            st.markdown("### 📚 검증된 신뢰 출처 근거 자료")
+            st.markdown("### 📚 검증된 신뢰 출처 근거 자료 (가로 3열 Grid)")
             
             sources = st.session_state.sources_data
             for i in range(0, len(sources), 3):
@@ -411,19 +473,47 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
+    # 2) 실시간 라이브 탐색 탭 (실시간 최신 정보 덧붙이기 버튼 추가)
     with tab_live:
-        st.markdown("### 🌐 실시간 수집 원시 데이터 (Raw Data Explorer)")
-        st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
+        st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
         
+        col_t1, col_t2 = st.columns([3.5, 1.5])
+        with col_t1:
+            st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
+        with col_t2:
+            # 🌟 사용자가 누르면 실시간으로 신규 데이터를 타임라인에 덧붙이는 버튼
+            if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
+                with st.spinner("📡 현재 시점 웹상 최신 자료를 실시간으로 탐색 중..."):
+                    run_docuscout_pipeline(user_query, is_live_refresh=True)
+                    st.rerun()
+
+        # 타임라인 로그 출력
+        if st.session_state.timeline_logs:
+            st.markdown("#### ⏱️ 에이전트 실시간 수집 타임라인")
+            timeline_html = "<div class='timeline-container'>"
+            for log in st.session_state.timeline_logs:
+                timeline_html += f"""
+                    <div class='timeline-item'>
+                        <div class='timeline-time'>[{log['time']}]</div>
+                        <div class='timeline-title'>{log['title']}</div>
+                        <div class='timeline-desc'>{log['desc']}</div>
+                    </div>
+                """
+            timeline_html += "</div>"
+            st.markdown(timeline_html, unsafe_allow_html=True)
+
         if st.session_state.sources_data:
+            st.markdown("---")
+            st.markdown(f"#### 📄 누적 수집된 Raw 데이터 목록 (총 {len(st.session_state.sources_data)}건)")
             for idx, src in enumerate(st.session_state.sources_data, 1):
                 with st.expander(f"📌 [{idx}] {src['title']}", expanded=True if idx == 1 else False):
                     st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
                     st.write(src['content'])
 
+    # 3) 신뢰도 심층 분석 탭
     with tab_audit:
         st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1%")
         m2.metric("공식/학술 출처 비율", f"{academic_ratio}.0%", "고품질 데이터")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data) if st.session_state.sources_data else 0}개", "정상 수집")
+        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "실시간 누적 중")
