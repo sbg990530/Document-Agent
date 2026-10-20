@@ -1,7 +1,7 @@
 import os
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import streamlit as st
 from tavily import TavilyClient
 from langchain_openai import ChatOpenAI
@@ -182,6 +182,9 @@ except Exception:
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 
+# 🌟 대한민국 표준시(KST, UTC+9) 정의
+KST = timezone(timedelta(hours=9))
+
 # =====================================================================
 # 세션 상태 초기화
 # =====================================================================
@@ -197,10 +200,10 @@ if "timeline_logs" not in st.session_state:
     st.session_state.timeline_logs = []
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (키워드 단일 문자열 강제 정제 로직 적용)
+# ⚙️ AI 파이프라인 (KST 현재 시간 적용)
 # =====================================================================
 def add_timeline_log(step_title, step_desc):
-    now_str = datetime.now().strftime("%H:%M:%S")
+    now_str = datetime.now(KST).strftime("%H:%M:%S")  # 👈 KST 기준으로 정확한 현재 시각 반영
     st.session_state.timeline_logs.append({
         "time": now_str,
         "title": step_title,
@@ -218,23 +221,20 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
     )
     
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
-    target_period = year_match.group(0) if year_match else datetime.now().strftime("%Y년 %m월")
+    target_period = year_match.group(0) if year_match else datetime.now(KST).strftime("%Y년 %m월")
 
-    # 🌟 LLM이 리스트를 반환하지 못하도록 단일 검색어 형식을 엄격하게 강제
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어(예: '2027년 e스포츠 시장 규모 전망')만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     raw_keyword_res = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
     
-    # 혹시라도 LLM이 줄바꿈이나 번호를 넣었을 경우를 대비한 안전 정제
     clean_keyword = raw_keyword_res.split('\n')[0].strip()
     clean_keyword = re.sub(r'^\d+[\.\)]\s*', '', clean_keyword).replace('"', '').strip()
     st.session_state.auto_keyword = clean_keyword
 
     add_timeline_log("🔍 키워드 추출 완료", f"타겟팅 검색 키워드: '{clean_keyword}'")
 
-    # Tavily 검색 수행 (max_results=20)
     search_response = tavily_client.search(
         query=clean_keyword,
         search_depth="advanced",
@@ -376,95 +376,3 @@ if st.session_state.report_data:
                     label="📥 리포트 다운로드",
                     data=st.session_state.report_data,
                     file_name="DocuScout_Report.txt",
-                    mime="text/plain",
-                    use_container_width=True
-                )
-
-            with st.container(border=True):
-                st.markdown(st.session_state.report_data)
-
-        with col_sub:
-            dynamic_avg_score = 91 + (hash(st.session_state.auto_keyword) % 7)
-            academic_ratio = 55 + (hash(st.session_state.auto_keyword) % 15)
-            news_ratio = 100 - academic_ratio
-
-            st.markdown("### 📈 신뢰도 요약")
-            with st.container(border=True):
-                st.markdown(f"##### 평균 신뢰도: <span style='color:#059669; font-weight:bold;'>{dynamic_avg_score}.1%</span>", unsafe_allow_html=True)
-                st.progress(dynamic_avg_score)
-                st.caption(f"• 학술/공식 보고서 비중: {academic_ratio}%")
-                st.caption(f"• IT/경제 전문 언론사 비중: {news_ratio}%")
-
-            st.markdown("### 💡 추천 후속 질문")
-            with st.container(border=True):
-                st.markdown(st.session_state.followup_data)
-
-        if st.session_state.sources_data:
-            st.markdown("---")
-            st.markdown("### 📚 검증된 신뢰 출처 근거 자료 (가로 3열 Grid)")
-            
-            sources = st.session_state.sources_data
-            for i in range(0, len(sources), 3):
-                c1, c2, c3 = st.columns(3)
-                cols = [c1, c2, c3]
-                
-                for j in range(3):
-                    if i + j < len(sources):
-                        src = sources[i + j]
-                        score = 90 + ((i + j * 3) % 9)
-                        clean_content = src['content'].replace('\n', ' ').strip()
-                        
-                        with cols[j]:
-                            st.markdown(f"""
-                                <div class="source-card-modern">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div style="display: flex; align-items: center; gap: 6px; max-width: 68%;">
-                                            <span style="background-color: #6366f1; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">#{i+j+1}</span>
-                                            <span style="font-weight: 600; color: #0f172a; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
-                                        </div>
-                                        <span class="score-chip">신뢰도 {score}%</span>
-                                    </div>
-                                    <p>{clean_content}</p>
-                                    <div style="font-size:0.72rem; color:#64748b;">Verified Fact Source</div>
-                                </div>
-                            """, unsafe_allow_html=True)
-                            
-                            if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
-                                open_source_modal(src, score)
-
-    # 2) 실시간 라이브 탐색 탭 (네이티브 컨테이너 기반 타임라인으로 HTML 노출 버그 원천 차단)
-    with tab_live:
-        st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
-        
-        col_t1, col_t2 = st.columns([3.5, 1.5])
-        with col_t1:
-            st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
-        with col_t2:
-            if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 현재 시점 웹상 최신 자료를 실시간으로 탐색 중..."):
-                    run_docuscout_pipeline(user_query, is_live_refresh=True)
-                    st.rerun()
-
-        # 🌟 HTML 태그 대신 네이티브 Streamlit 컨테이너로 타임라인 출력 (코드 노출 방지)
-        if st.session_state.timeline_logs:
-            st.markdown("#### ⏱️ 에이전트 실시간 수집 타임라인")
-            for log in st.session_state.timeline_logs:
-                with st.container(border=True):
-                    st.markdown(f"⏱️ **`{log['time']}`** &nbsp;|&nbsp; **{log['title']}**")
-                    st.caption(log['desc'])
-
-        if st.session_state.sources_data:
-            st.markdown("---")
-            st.markdown(f"#### 📄 누적 수집된 Raw 데이터 목록 (총 {len(st.session_state.sources_data)}건)")
-            for idx, src in enumerate(st.session_state.sources_data, 1):
-                with st.expander(f"📌 [{idx}] {src['title']}", expanded=True if idx == 1 else False):
-                    st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
-                    st.write(src['content'])
-
-    # 3) 신뢰도 심층 분석 탭
-    with tab_audit:
-        st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
-        m1, m2, m3 = st.columns(3)
-        m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1%")
-        m2.metric("공식/학술 출처 비율", f"{academic_ratio}.0%", "고품질 데이터")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "실시간 누적 중")
