@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 타임라인 전용 커스텀 CSS
+# 🎨 라이트 아로라 테마 및 깔끔한 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -110,50 +110,6 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* 실시간 타임라인 노드 UI 스타일 디자인 */
-    .timeline-container {
-        border-left: 3px solid #6366f1;
-        padding-left: 20px;
-        margin-left: 10px;
-        margin-bottom: 24px;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 16px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(203, 213, 225, 0.7);
-        border-radius: 12px;
-        padding: 12px 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -28px;
-        top: 16px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #6366f1;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-    }
-    .timeline-time {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: #6366f1;
-        margin-bottom: 4px;
-    }
-    .timeline-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #0f172a;
-    }
-    .timeline-desc {
-        font-size: 0.85rem;
-        color: #64748b;
-        margin-top: 2px;
-    }
-
     /* 버튼 스타일 및 가시성 강제 고정 */
     div.stButton > button, 
     div.stFormSubmitButton > button, 
@@ -173,7 +129,7 @@ st.markdown("""
     div.stFormSubmitButton > button:hover, 
     div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
-        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 100%, #3730a3 100%) !important;
         box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -241,7 +197,7 @@ if "timeline_logs" not in st.session_state:
     st.session_state.timeline_logs = []
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (실시간 타임라인 & 라이브 덧붙이기 지원)
+# ⚙️ AI 파이프라인 (키워드 단일 문자열 강제 정제 로직 적용)
 # =====================================================================
 def add_timeline_log(step_title, step_desc):
     now_str = datetime.now().strftime("%H:%M:%S")
@@ -264,21 +220,26 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     target_period = year_match.group(0) if year_match else datetime.now().strftime("%Y년 %m월")
 
+    # 🌟 LLM이 리스트를 반환하지 못하도록 단일 검색어 형식을 엄격하게 강제
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 수 있는 검색 키워드를 생성하세요."),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어(예: '2027년 e스포츠 시장 규모 전망')만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
-    auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
-    st.session_state.auto_keyword = auto_keyword
+    raw_keyword_res = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
+    
+    # 혹시라도 LLM이 줄바꿈이나 번호를 넣었을 경우를 대비한 안전 정제
+    clean_keyword = raw_keyword_res.split('\n')[0].strip()
+    clean_keyword = re.sub(r'^\d+[\.\)]\s*', '', clean_keyword).replace('"', '').strip()
+    st.session_state.auto_keyword = clean_keyword
 
-    add_timeline_log("🔍 키워드 추출 완료", f"타겟팅 검색 키워드: '{auto_keyword}'")
+    add_timeline_log("🔍 키워드 추출 완료", f"타겟팅 검색 키워드: '{clean_keyword}'")
 
-    # Tavily 검색 수행
+    # Tavily 검색 수행 (max_results=20)
     search_response = tavily_client.search(
-        query=auto_keyword,
+        query=clean_keyword,
         search_depth="advanced",
         topic="general",
-        max_results=15,
+        max_results=20,
         exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki"]
     )
     raw_sources = search_response.get('results', [])
@@ -322,7 +283,6 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
 
             refined_new.append({"title": kr_title, "content": kr_content, "url": result['url']})
 
-        # 기존 출처에 새로 찾아온 최신 출처 덧붙이기 (중복 제외)
         existing_urls = {s['url'] for s in st.session_state.sources_data}
         added_count = 0
         for item in refined_new:
@@ -332,7 +292,6 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
 
         add_timeline_log("✅ 라이브 수집 완료", f"신규 최신 출처 {added_count}건이 타임라인에 추가되었습니다!")
 
-    # 리포트 생성 (최초 탐색이거나 새로고침 시 업데이트)
     if not st.session_state.report_data or is_live_refresh:
         add_timeline_log("🤖 AI 종합 리포트 생성", "GPT-4o-mini 기반 심층 리서치 보고서 최종 가공 중...")
         
@@ -400,7 +359,7 @@ if submit_btn and user_query:
         run_docuscout_pipeline(user_query, is_live_refresh=False)
 
 # =====================================================================
-# 3. 결과 출력 및 탭 시스템 (실시간 덧붙이기 라이브 버튼 추가)
+# 3. 결과 출력 및 탭 시스템
 # =====================================================================
 if st.session_state.report_data:
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
@@ -473,7 +432,7 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    # 2) 실시간 라이브 탐색 탭 (실시간 최신 정보 덧붙이기 버튼 추가)
+    # 2) 실시간 라이브 탐색 탭 (네이티브 컨테이너 기반 타임라인으로 HTML 노출 버그 원천 차단)
     with tab_live:
         st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
         
@@ -481,26 +440,18 @@ if st.session_state.report_data:
         with col_t1:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
-            # 🌟 사용자가 누르면 실시간으로 신규 데이터를 타임라인에 덧붙이는 버튼
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
                 with st.spinner("📡 현재 시점 웹상 최신 자료를 실시간으로 탐색 중..."):
                     run_docuscout_pipeline(user_query, is_live_refresh=True)
                     st.rerun()
 
-        # 타임라인 로그 출력
+        # 🌟 HTML 태그 대신 네이티브 Streamlit 컨테이너로 타임라인 출력 (코드 노출 방지)
         if st.session_state.timeline_logs:
             st.markdown("#### ⏱️ 에이전트 실시간 수집 타임라인")
-            timeline_html = "<div class='timeline-container'>"
             for log in st.session_state.timeline_logs:
-                timeline_html += f"""
-                    <div class='timeline-item'>
-                        <div class='timeline-time'>[{log['time']}]</div>
-                        <div class='timeline-title'>{log['title']}</div>
-                        <div class='timeline-desc'>{log['desc']}</div>
-                    </div>
-                """
-            timeline_html += "</div>"
-            st.markdown(timeline_html, unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown(f"⏱️ **`{log['time']}`** &nbsp;|&nbsp; **{log['title']}**")
+                    st.caption(log['desc'])
 
         if st.session_state.sources_data:
             st.markdown("---")
