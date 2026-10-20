@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 탭 디자인 오버라이드 및 라이트 모드 전면 커스텀 CSS (최신 스트림릿 버전 완벽 대응)
+# 🎨 라이트 아로라 테마 및 커스텀 라디오 탭 스타일링 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -82,43 +82,37 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 🌟 [핵심] 투박한 탭 기본 박스 및 하단 밑줄 완전 차단 후 세련된 알약형으로 변환 */
-    .stTabs {
-        margin-top: 10px;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px !important;
+    /* 🌟 라디오 버튼을 완벽한 알약형 탭 메뉴로 변환하는 스타일 */
+    div.row-widget.stRadio > div {
         background: rgba(241, 245, 249, 0.9) !important;
-        padding: 6px 8px !important;
+        padding: 6px !important;
         border-radius: 16px !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
+        display: inline-flex !important;
+        gap: 8px !important;
     }
-    .stTabs [data-baseweb="tab"] {
-        height: 40px !important;
+    div.row-widget.stRadio > div > label {
         background-color: transparent !important;
         border-radius: 12px !important;
-        border: none !important;
+        padding: 8px 20px !important;
         color: #64748b !important;
         font-weight: 700 !important;
-        font-size: 0.9rem !important;
-        padding: 0 20px !important;
+        font-size: 0.92rem !important;
         transition: all 0.2s ease !important;
+        border: none !important;
     }
-    .stTabs [data-baseweb="tab"]:hover {
+    div.row-widget.stRadio > div > label:hover {
         color: #334155 !important;
         background-color: rgba(255, 255, 255, 0.5) !important;
     }
-    /* 선택된 탭: 파란색 사각형과 밑줄을 완전히 없애고 부드러운 인디고 알약으로 고정 */
-    .stTabs [aria-selected="true"] {
+    /* 선택된 탭 라디오 버튼 강조 */
+    div.row-widget.stRadio > div > label[data-checked="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35) !important;
     }
-    /* 하단 스트림릿 기본 밑줄 바 및 인디케이터 라인 강제 숨김 */
-    .stTabs div[data-baseweb="tab-border"],
-    .stTabs div[data-baseweb="tab-highlight"],
-    .stTabs [data-baseweb="tab-list"] div[style*="position: absolute"] {
+    /* 라디오 기본 원격 동그라미 숨김 처리 */
+    div.row-widget.stRadio input[type="radio"] {
         display: none !important;
     }
 
@@ -207,7 +201,7 @@ if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (무관한 출처 필터링 강화)
+# ⚙️ AI 파이프라인
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -344,12 +338,20 @@ if submit_btn:
             st.session_state.sources_data = srcs
 
 # =====================================================================
-# 3. 결과 출력 및 3개 탭 네비게이션 시스템
+# 3. 결과 출력 및 커스텀 알약형 탭 메뉴 시스템 (st.radio 활용)
 # =====================================================================
 if st.session_state.report_data:
-    tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    
+    # 가로형 라디오 버튼으로 탭 구현
+    selected_tab = st.radio(
+        "Navigation",
+        ["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
 
-    with tab_dash:
+    if selected_tab == "📊 대시보드":
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         col_main, col_sub = st.columns([2.2, 1])
 
@@ -418,7 +420,7 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    with tab_live:
+    elif selected_tab == "⚡ 실시간 라이브 탐색":
         st.markdown("### 🌐 실시간 수집 원시 데이터 (Raw Data Explorer)")
         st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         
@@ -428,7 +430,7 @@ if st.session_state.report_data:
                     st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
                     st.write(src['content'])
 
-    with tab_audit:
+    elif selected_tab == "🛡️ 신뢰도 심층 분석":
         st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1%")
