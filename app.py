@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 폰트 크기 가독성 전면 개선 CSS
+# 🎨 라이트 아로라 테마 및 가독성 개선 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -94,7 +94,7 @@ st.markdown("""
         color: #0f172a !important;
     }
 
-    /* 🌟 리포트 및 본문 글자 크기 살짝 확대 (가독성 상향) */
+    /* 리포트 및 본문 글자 크기 가독성 향상 */
     [data-testid="stMarkdownContainer"] p, 
     [data-testid="stMarkdownContainer"] li {
         font-size: 1.05rem !important;
@@ -134,7 +134,7 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 (글자 크기 미세 조정) */
+    /* 3열 출처 카드 */
     .source-card-modern {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(203, 213, 225, 0.7);
@@ -194,7 +194,7 @@ if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
 
 # =====================================================================
-# ⚙️ AI 파이프라인
+# ⚙️ AI 파이프라인 (통계/시장 전망 타겟팅 강화)
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -203,8 +203,9 @@ def run_docuscout(query_text):
     else:
         target_period = datetime.now().strftime("%Y년 %m월")
 
+    # 🌟 단순 개념정의 블로그를 피하고 시장 보고서/통계 수치를 타겟팅하는 검색 쿼리 생성
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 명사 주제를 명확하게 추출하여 검색어 1개만 정확하게 출력하세요."),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 수 있는 검색 키워드를 생성하세요. 단순 정의나 개요문서가 아닌 산업 전망 데이터를 찾도록 '시장 규모 전망' 키워드를 반드시 포함하세요. (예: e스포츠 시장 규모 전망 2027)"),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -214,7 +215,7 @@ def run_docuscout(query_text):
         search_depth="advanced",
         topic="general",
         max_results=12,
-        exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com"]
+        exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki"]
     )
     raw_sources = search_response.get('results', [])
 
@@ -223,15 +224,21 @@ def run_docuscout(query_text):
         "리플", "도지코인", "시바이누", "비트코인", "암호화폐", "파이코인", "전기자전거", 
         "카지노", "슬롯", "대리점", "데모", "HTML"
     ]
-    query_core_terms = ["e스포츠", "esports", "게임", "gaming", "시장", "market"]
+    # 단순 정의어("뜻", "개념", "정의")가 포함된 원론적 기사도 제외
+    def_noise_keywords = ["뜻", "정의", "개념", "1~14주차", "강의"]
 
     filtered_sources = []
     for src in raw_sources:
         combined_text = (src['title'] + " " + src['content']).lower()
+        
+        # 노이즈 단어 체크
         if any(nk in combined_text for nk in noise_keywords):
             continue
-        if any(term in combined_text for term in query_core_terms):
-            filtered_sources.append(src)
+        # 단순 기본 정의어 위주 제목 제거 (전망/통계 기사 위주 선별)
+        if any(dnk in src['title'].lower() for dnk in def_noise_keywords):
+            continue
+
+        filtered_sources.append(src)
 
     collected_sources = filtered_sources[:6] if filtered_sources else raw_sources[:6]
 
@@ -241,7 +248,7 @@ def run_docuscout(query_text):
     refined_sources = []
     for result in collected_sources:
         translate_prompt = ChatPromptTemplate.from_messages([
-            ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 상황에 맞는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+            ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 수치 데이터 및 산업 전망을 반영하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
             ("user", "원문 제목: {title}\n원문 내용: {content}")
         ])
         trans_res = (translate_prompt | llm).invoke({
@@ -267,7 +274,7 @@ def run_docuscout(query_text):
         collected_context += f"[{idx}] 제목 : {result['title']}\n내용 : {result['content']}\n\n"
 
     report_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 상황에 맞춰 목차(1. 개요, 2. 주요 팩트, 3. 시사점)에 정확히 부합하는 한국어 보고서를 작성하세요."),
+        ("system", "당신은 전문 리서치 에이전트입니다. 수집된 데이터를 바탕으로 지정된 시점({target_period})의 시장 전망 수치와 수집 팩트에 맞춰 목차(1. 개요, 2. 주요 팩트 및 통계, 3. 시사점)에 부합하는 한국어 보고서를 작성하세요."),
         ("user", "대상 시점: {target_period}\n수집 데이터 :\n{context}\n\n분석 요청사항 : {query}")
     ])
     report_res = (report_prompt | llm).invoke({"target_period": target_period, "context": collected_context, "query": query_text})
@@ -331,7 +338,7 @@ if submit_btn:
             st.session_state.sources_data = srcs
 
 # =====================================================================
-# 3. 결과 출력 및 높이/글자크기 수평 완벽 통일 st.tabs 시스템
+# 3. 결과 출력 및 st.tabs 네비게이션 시스템
 # =====================================================================
 if st.session_state.report_data:
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
