@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 탭 디자인 및 라이트 모드 전면 커스텀 CSS
+# 🎨 탭 디자인 오버라이드 및 라이트 모드 전면 커스텀 CSS (최신 스트림릿 버전 완벽 대응)
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -82,40 +82,43 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 세련된 탭(Tab) 알약형 커스텀 스타일 */
+    /* 🌟 [핵심] 투박한 탭 기본 박스 및 하단 밑줄 완전 차단 후 세련된 알약형으로 변환 */
+    .stTabs {
+        margin-top: 10px;
+    }
     .stTabs [data-baseweb="tab-list"] {
-        gap: 12px !important;
-        background: rgba(241, 245, 249, 0.8) !important;
-        padding: 6px 10px !important;
+        gap: 10px !important;
+        background: rgba(241, 245, 249, 0.9) !important;
+        padding: 6px 8px !important;
         border-radius: 16px !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
-        backdrop-filter: blur(10px) !important;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 42px !important;
+        height: 40px !important;
         background-color: transparent !important;
         border-radius: 12px !important;
         border: none !important;
         color: #64748b !important;
         font-weight: 700 !important;
-        font-size: 0.92rem !important;
-        padding: 0 22px !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        font-size: 0.9rem !important;
+        padding: 0 20px !important;
+        transition: all 0.2s ease !important;
     }
     .stTabs [data-baseweb="tab"]:hover {
         color: #334155 !important;
-        background-color: rgba(255, 255, 255, 0.6) !important;
+        background-color: rgba(255, 255, 255, 0.5) !important;
     }
+    /* 선택된 탭: 파란색 사각형과 밑줄을 완전히 없애고 부드러운 인디고 알약으로 고정 */
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35) !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35) !important;
     }
-    .stTabs [data-baseweb="tab-border"] {
-        display: none !important;
-    }
-    .stTabs [data-baseweb="tab-highlight"] {
+    /* 하단 스트림릿 기본 밑줄 바 및 인디케이터 라인 강제 숨김 */
+    .stTabs div[data-baseweb="tab-border"],
+    .stTabs div[data-baseweb="tab-highlight"],
+    .stTabs [data-baseweb="tab-list"] div[style*="position: absolute"] {
         display: none !important;
     }
 
@@ -204,7 +207,7 @@ if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
 
 # =====================================================================
-# ⚙️ AI 파이프라인 (무관한 출처 완벽 필터링 강화)
+# ⚙️ AI 파이프라인 (무관한 출처 필터링 강화)
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -214,7 +217,7 @@ def run_docuscout(query_text):
         target_period = datetime.now().strftime("%Y년 %m월")
 
     keyword_prompt = ChatPromptTemplate.from_messages([
-        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 명사 주제를 명확하게 추출하여 검색어 1개만 정확하게 출력하세요. (예: 2027년 e스포츠 시장 규모 전망)"),
+        ("system", "사용자 질문에서 지정된 시점({target_period})과 핵심 명사 주제를 명확하게 추출하여 검색어 1개만 정확하게 출력하세요."),
         ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
     ])
     auto_keyword = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -228,25 +231,18 @@ def run_docuscout(query_text):
     )
     raw_sources = search_response.get('results', [])
 
-    # 🌟 스팸/무관한 잡음 기사 검증 필터 목록 대폭 확장
     noise_keywords = [
         "포르쉐", "텔루라이드", "전기차", "슈퍼볼", "베팅", "NFL", "NBA", "포뮬러",
         "리플", "도지코인", "시바이누", "비트코인", "암호화폐", "파이코인", "전기자전거", 
         "카지노", "슬롯", "대리점", "데모", "HTML"
     ]
-    
-    # 필수 연관 키워드 추출 (예: e스포츠 질문이면 esports/게임 관련 단어 포함 검증)
     query_core_terms = ["e스포츠", "esports", "게임", "gaming", "시장", "market"]
 
     filtered_sources = []
     for src in raw_sources:
         combined_text = (src['title'] + " " + src['content']).lower()
-        
-        # 1) 노이즈 키워드 포함 시 탈락
         if any(nk in combined_text for nk in noise_keywords):
             continue
-            
-        # 2) 질문의 핵심 주제 단어가 최소 1개 이상 들어있는지 확인
         if any(term in combined_text for term in query_core_terms):
             filtered_sources.append(src)
 
