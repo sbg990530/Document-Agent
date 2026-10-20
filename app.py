@@ -72,7 +72,7 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 🌟 st.form 박스 스타일 하나로 단일화 */
+    /* st.form 박스 스타일 하나로 단일화 */
     [data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
@@ -82,7 +82,7 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 🌟 세련된 탭(Tab) 알약형 커스텀 스타일 */
+    /* 세련된 탭(Tab) 알약형 커스텀 스타일 */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px !important;
         background: rgba(241, 245, 249, 0.8) !important;
@@ -106,14 +106,12 @@ st.markdown("""
         color: #334155 !important;
         background-color: rgba(255, 255, 255, 0.6) !important;
     }
-    /* 선택된 탭 스타일 (투박한 네이티브 박스 및 하단 라인 제거) */
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35) !important;
     }
-    /* 스트림릿 기본 하단 밑줄 강조선 완전히 숨김 처리 */
     .stTabs [data-baseweb="tab-border"] {
         display: none !important;
     }
@@ -206,7 +204,7 @@ if "auto_keyword" not in st.session_state:
     st.session_state.auto_keyword = ""
 
 # =====================================================================
-# ⚙️ AI 파이프라인
+# ⚙️ AI 파이프라인 (프롬프트 구문 오류 수정 완료)
 # =====================================================================
 def run_docuscout(query_text):
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
@@ -244,11 +242,16 @@ def run_docuscout(query_text):
 
     refined_sources = []
     for result in collected_sources:
+        # 🌟 LangChain 템플릿 파싱 충돌 방지를 위해 안전한 포맷으로 수정
         translate_prompt = ChatPromptTemplate.from_messages([
-            ("system", f"제공된 문서를 분석하여 지정된 시점({target_period})의 상황에 맞는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
-            ("user", f"원문 제목: {result['title']}\n원문 내용: {result['content']}")
+            ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 상황에 맞는지 확인하고, 자연스럽고 명확한 '한국어'로 제목과 내용을 각각 번역 및 요약하세요. 반드시 아래 양식으로만 출력하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+            ("user", "원문 제목: {title}\n원문 내용: {content}")
         ])
-        trans_res = (translate_prompt | llm).invoke({}).content
+        trans_res = (translate_prompt | llm).invoke({
+            "target_period": target_period,
+            "title": result['title'],
+            "content": result['content']
+        }).content
         
         title_match = re.search(r'제목:\s*(.+)', trans_res)
         content_match = re.search(r'내용:\s*([\s\S]+)', trans_res)
