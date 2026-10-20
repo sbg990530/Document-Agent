@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 확장 박스 UI 커스텀 CSS
+# 🎨 라이트 아로라 테마 및 UI 커스텀 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -73,6 +73,18 @@ st.markdown("""
         gap: 8px;
     }
 
+    /* 🌟 탭 내부 메인 타이틀 공통 스타일 클래스 */
+    .tab-main-title {
+        font-size: 1.6rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 4px !important;
+        margin-bottom: 20px !important;
+    }
+
     /* 🌟 st.expander (접이식 박스) 크기 및 글자 크기 대폭 확대 */
     [data-testid="stExpander"] {
         background: rgba(255, 255, 255, 0.95) !important;
@@ -100,16 +112,9 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 각 탭 패널 상단 여백 및 타이틀 크기 조정 */
+    /* 각 탭 패널 상단 여백 설정 */
     [data-testid="stTabPanel"] {
         padding-top: 16px !important;
-    }
-    [data-testid="stTabPanel"] h3 {
-        margin-top: 0px !important;
-        margin-bottom: 16px !important;
-        font-size: 1.45rem !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
     }
 
     /* 리포트 및 본문 글자 크기 가독성 */
@@ -393,8 +398,8 @@ if st.session_state.report_data:
         with col_main:
             col_h1, col_h2 = st.columns([3, 1.2])
             with col_h1:
-                # 🌟 아이콘 변경 및 크기 대폭 확대 (HTML 마크다운 적용)
-                st.markdown("<h2 style='font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; margin: 0;'><span>📋</span> AI 에이전트 종합 리포트</h2>", unsafe_allow_html=True)
+                # 🌟 일관된 타이틀 스타일 클래스 적용
+                st.markdown("<div class='tab-main-title'><span>📋</span> AI 에이전트 종합 리포트</div>", unsafe_allow_html=True)
             with col_h2:
                 st.download_button(
                     label="📥 리포트 다운로드",
@@ -458,7 +463,8 @@ if st.session_state.report_data:
 
     # 2) 실시간 라이브 탐색 탭
     with tab_live:
-        st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
+        # 🌟 일관된 타이틀 스타일 클래스 적용
+        st.markdown("<div class='tab-main-title'><span>🌐</span> 실시간 수집 원시 데이터 & 라이브 타임라인</div>", unsafe_allow_html=True)
         
         col_t1, col_t2 = st.columns([3.5, 1.5])
         with col_t1:
@@ -491,7 +497,8 @@ if st.session_state.report_data:
 
     # 3) 신뢰도 심층 분석 탭
     with tab_audit:
-        st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
+        # 🌟 일관된 타이틀 스타일 클래스 적용
+        st.markdown("<div class='tab-main-title'><span>🛡️</span> AI 팩트체크 & 출처 검증 메트릭</div>", unsafe_allow_html=True)
         
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1% 안정권")
