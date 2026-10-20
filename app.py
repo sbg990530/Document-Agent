@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 제목 높이 완벽 통일 CSS
+# 🎨 라이트 아로라 테마 및 폰트 크기 가독성 전면 개선 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -43,7 +43,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 12px;
-        font-size: 1.3rem;
+        font-size: 1.35rem;
         font-weight: 800;
         color: #0f172a;
     }
@@ -65,7 +65,7 @@ st.markdown("""
         border: 1px solid rgba(16, 185, 129, 0.3);
         padding: 6px 14px;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.82rem;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -82,16 +82,31 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 🌟 각 탭 패널 상단 여백을 정확히 16px로 수평 정렬 통일 */
+    /* 각 탭 패널 상단 여백 및 타이틀 크기 조정 */
     [data-testid="stTabPanel"] {
         padding-top: 16px !important;
     }
     [data-testid="stTabPanel"] h3 {
         margin-top: 0px !important;
         margin-bottom: 16px !important;
-        font-size: 1.35rem !important;
+        font-size: 1.45rem !important;
         font-weight: 800 !important;
         color: #0f172a !important;
+    }
+
+    /* 🌟 리포트 및 본문 글자 크기 살짝 확대 (가독성 상향) */
+    [data-testid="stMarkdownContainer"] p, 
+    [data-testid="stMarkdownContainer"] li {
+        font-size: 1.05rem !important;
+        line-height: 1.72 !important;
+        color: #334155 !important;
+    }
+    [data-testid="stMarkdownContainer"] h4 {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        margin-top: 16px !important;
+        margin-bottom: 8px !important;
     }
 
     /* 버튼 스타일 및 가시성 강제 고정 */
@@ -104,8 +119,8 @@ st.markdown("""
         border: 1px solid rgba(99, 102, 241, 0.4) !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        font-size: 0.92rem !important;
-        height: 44px !important;
+        font-size: 0.95rem !important;
+        height: 46px !important;
         transition: all 0.25s ease !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
     }
@@ -119,7 +134,7 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 */
+    /* 3열 출처 카드 (글자 크기 미세 조정) */
     .source-card-modern {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(203, 213, 225, 0.7);
@@ -127,7 +142,7 @@ st.markdown("""
         border-radius: 16px;
         padding: 18px 20px;
         margin-bottom: 12px;
-        height: 175px !important;
+        height: 180px !important;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -135,9 +150,9 @@ st.markdown("""
     }
     .source-card-modern p {
         color: #475569;
-        font-size: 0.83rem;
-        line-height: 1.45;
-        margin: 4px 0;
+        font-size: 0.88rem !important;
+        line-height: 1.5 !important;
+        margin: 6px 0;
         -webkit-line-clamp: 3;
         display: -webkit-box;
         -webkit-box-orient: vertical;
@@ -149,7 +164,7 @@ st.markdown("""
         border: 1px solid rgba(16, 185, 129, 0.3);
         padding: 2px 10px;
         border-radius: 20px;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 700;
     }
     </style>
@@ -293,7 +308,7 @@ st.markdown("""
 # 2. 통합 st.form
 # =====================================================================
 with st.form(key="search_form"):
-    st.markdown('<div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
     
     col_s1, col_s2 = st.columns([5, 1.2])
     with col_s1:
@@ -316,7 +331,7 @@ if submit_btn:
             st.session_state.sources_data = srcs
 
 # =====================================================================
-# 3. 결과 출력 및 높이가 완전 수평 고정된 st.tabs 시스템
+# 3. 결과 출력 및 높이/글자크기 수평 완벽 통일 st.tabs 시스템
 # =====================================================================
 if st.session_state.report_data:
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
@@ -377,12 +392,12 @@ if st.session_state.report_data:
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div style="display: flex; align-items: center; gap: 6px; max-width: 68%;">
                                             <span style="background-color: #6366f1; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">#{i+j+1}</span>
-                                            <span style="font-weight: 600; color: #0f172a; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
+                                            <span style="font-weight: 600; color: #0f172a; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{src['title']}</span>
                                         </div>
                                         <span class="score-chip">신뢰도 {score}%</span>
                                     </div>
                                     <p>{clean_content}</p>
-                                    <div style="font-size:0.7rem; color:#64748b;">Verified Fact Source</div>
+                                    <div style="font-size:0.72rem; color:#64748b;">Verified Fact Source</div>
                                 </div>
                             """, unsafe_allow_html=True)
                             
