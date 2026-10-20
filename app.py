@@ -393,7 +393,8 @@ if st.session_state.report_data:
         with col_main:
             col_h1, col_h2 = st.columns([3, 1.2])
             with col_h1:
-                st.markdown("### 🤖 AI 에이전트 종합 리포트")
+                # 🌟 아이콘 변경 및 크기 대폭 확대 (HTML 마크다운 적용)
+                st.markdown("<h2 style='font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; margin: 0;'><span>📋</span> AI 에이전트 종합 리포트</h2>", unsafe_allow_html=True)
             with col_h2:
                 st.download_button(
                     label="📥 리포트 다운로드",
@@ -455,7 +456,7 @@ if st.session_state.report_data:
                             if st.button(f"🔍 원문 미리보기 (#{i+j+1})", key=f"modal_btn_{i+j}", use_container_width=True):
                                 open_source_modal(src, score)
 
-    # 2) 실시간 라이브 탐색 탭 (확대된 접이식 박스 및 역순 정렬 적용)
+    # 2) 실시간 라이브 탐색 탭
     with tab_live:
         st.markdown("### 🌐 실시간 수집 원시 데이터 & 라이브 타임라인")
         
@@ -468,7 +469,7 @@ if st.session_state.report_data:
                     run_docuscout_pipeline(user_query, is_live_refresh=True)
                     st.rerun()
 
-        # 타임라인 로그 접이식 박스 (확대된 스타일 적용)
+        # 타임라인 로그 접이식 박스
         if st.session_state.timeline_logs:
             log_count = len(st.session_state.timeline_logs)
             with st.expander(f"⏱️ 에이전트 실시간 수집 타임라인 로그 히스토리 (총 {log_count}개 단계)", expanded=False):
@@ -477,7 +478,7 @@ if st.session_state.report_data:
                         st.markdown(f"⏱️ **`{log['time']}`** &nbsp;|&nbsp; **{log['title']}**")
                         st.caption(log['desc'])
 
-        # Raw 데이터 목록 접이식 박스 (확대된 스타일 및 최신순 정렬 적용)
+        # Raw 데이터 목록 접이식 박스
         if st.session_state.sources_data:
             source_count = len(st.session_state.sources_data)
             with st.expander(f"📄 누적 수집된 Raw 데이터 목록 히스토리 (총 {source_count}건)", expanded=False):
@@ -488,11 +489,10 @@ if st.session_state.report_data:
                         st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
                         st.write(src['content'])
 
-    # 3) 신뢰도 심층 분석 탭 (풍성한 분석 콘텐츠 대공개!)
+    # 3) 신뢰도 심층 분석 탭
     with tab_audit:
         st.markdown("### 🛡️ AI 팩트체크 & 출처 검증 메트릭")
         
-        # 상단 핵심 지표 3개 메트릭
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.1%", "+2.1% 안정권")
         m2.metric("공식/학술 출처 비율", f"{academic_ratio}.0%", "고품질 데이터 집중")
@@ -500,7 +500,6 @@ if st.session_state.report_data:
 
         st.markdown("---")
 
-        # 2단 레이아웃 구성 (좌측: 노이즈 필터링 로그 / 우측: 도메인 등급 분포)
         col_audit_1, col_audit_2 = st.columns(2)
 
         with col_audit_1:
