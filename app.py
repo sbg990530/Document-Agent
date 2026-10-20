@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 검색 입력 영역 단일 통합 및 화사한 라이트 테마 CSS
+# 🎨 탭 디자인 및 라이트 모드 전면 커스텀 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -72,7 +72,7 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 🌟 st.form 박스 스타일 하나로 깔끔하게 단일화 */
+    /* 🌟 st.form 박스 스타일 하나로 단일화 */
     [data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
@@ -82,27 +82,43 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 탭 스타일 고급화 */
+    /* 🌟 세련된 탭(Tab) 알약형 커스텀 스타일 */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: rgba(255, 255, 255, 0.7);
-        padding: 6px;
-        border-radius: 16px;
-        border: 1px solid rgba(203, 213, 225, 0.6);
+        gap: 12px !important;
+        background: rgba(241, 245, 249, 0.8) !important;
+        padding: 6px 10px !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(203, 213, 225, 0.8) !important;
+        backdrop-filter: blur(10px) !important;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 44px;
-        background-color: transparent;
-        border-radius: 12px;
-        color: #64748b;
-        font-weight: 600;
-        font-size: 0.95rem;
-        padding: 0 24px;
+        height: 42px !important;
+        background-color: transparent !important;
+        border-radius: 12px !important;
+        border: none !important;
+        color: #64748b !important;
+        font-weight: 700 !important;
+        font-size: 0.92rem !important;
+        padding: 0 22px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #334155 !important;
+        background-color: rgba(255, 255, 255, 0.6) !important;
+    }
+    /* 선택된 탭 스타일 (투박한 네이티브 박스 및 하단 라인 제거) */
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        -webkit-text-fill-color: #ffffff !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35) !important;
+    }
+    /* 스트림릿 기본 하단 밑줄 강조선 완전히 숨김 처리 */
+    .stTabs [data-baseweb="tab-border"] {
+        display: none !important;
+    }
+    .stTabs [data-baseweb="tab-highlight"] {
+        display: none !important;
     }
 
     /* 버튼 스타일 및 가시성 강제 고정 */
@@ -289,7 +305,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 하나의 박스 안으로 타이틀+입력창+버튼을 완벽히 통합한 st.form
+# 2. 통합 st.form
 # =====================================================================
 with st.form(key="search_form"):
     st.markdown('<div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
