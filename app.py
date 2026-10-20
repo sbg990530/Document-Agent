@@ -375,4 +375,4 @@ if st.session_state.report_data:
                 st.download_button(
                     label="📥 리포트 다운로드",
                     data=st.session_state.report_data,
-                    file_name="DocuScout_Report.txt",
+                    file_name="DocuScout_Report.txt",)
