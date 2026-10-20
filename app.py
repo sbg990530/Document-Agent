@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 라이트 아로라 테마 및 깔끔한 CSS
+# 🎨 라이트 아로라 테마 및 제목 높이 완벽 통일 CSS
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -80,6 +80,18 @@ st.markdown("""
         padding: 20px 24px !important;
         margin-bottom: 24px !important;
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
+    }
+
+    /* 🌟 각 탭 패널 상단 여백을 정확히 16px로 수평 정렬 통일 */
+    [data-testid="stTabPanel"] {
+        padding-top: 16px !important;
+    }
+    [data-testid="stTabPanel"] h3 {
+        margin-top: 0px !important;
+        margin-bottom: 16px !important;
+        font-size: 1.35rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
     }
 
     /* 버튼 스타일 및 가시성 강제 고정 */
@@ -304,19 +316,17 @@ if submit_btn:
             st.session_state.sources_data = srcs
 
 # =====================================================================
-# 3. 결과 출력 및 기본 st.tabs 네비게이션
+# 3. 결과 출력 및 높이가 완전 수평 고정된 st.tabs 시스템
 # =====================================================================
 if st.session_state.report_data:
     tab_dash, tab_live, tab_audit = st.tabs(["📊 대시보드", "⚡ 실시간 라이브 탐색", "🛡️ 신뢰도 심층 분석"])
 
     with tab_dash:
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         col_main, col_sub = st.columns([2.2, 1])
 
         with col_main:
             col_h1, col_h2 = st.columns([3, 1.2])
             with col_h1:
-                # 🌟 다른 탭의 제목(###)과 동일한 크기로 단정하게 맞춤
                 st.markdown("### 🤖 AI 에이전트 종합 리포트")
             with col_h2:
                 st.download_button(
