@@ -228,7 +228,7 @@ if "noise_filtered_count" not in st.session_state:
     st.session_state.noise_filtered_count = 14
 
 # =====================================================================
-# ⚙️ LangGraph 에이전트 파이프라인 구조 정의
+# ⚙️ LangGraph 에이전트 자가 수정(Self-Correction) 파이프라인 구조
 # =====================================================================
 def add_timeline_log(step_title, step_desc):
     now_str = datetime.now(KST).strftime("%H:%M:%S")
@@ -254,15 +254,21 @@ def create_docuscout_graph():
     def planner_node(state: AgentState):
         query_text = state["query"]
         target_period = state["target_period"]
+        retry_count = state.get("retry_count", 0)
         is_live = state.get("is_live_refresh", False)
         
-        add_timeline_log(
-            "🔄 라이브 최신 데이터 수집 시작" if is_live else "🎯 1단계: 시점 감지 및 쿼리 생성",
-            "현재 시점 기준 최신 웹 트렌드 감지 중..." if is_live else "질의어에서 시점을 감지하고 시장 전망 수치 타겟팅 쿼리를 생성 중..."
-        )
-        
+        if retry_count > 0:
+            add_timeline_log("🎯 2단계: 검색어 재조합 (Self-Correction)", "1차 수집된 팩트가 부족하여 더 광범위하고 구체적인 전문 용어로 검색어를 재조합합니다.")
+            prompt_system = "이전 검색에서 충분한 통계 수치를 찾지 못했습니다. 보다 광범위하거나 대체 가능한 전문 용어를 조합하여 새로운 시장 전망 검색어 단 하나만 출력하세요."
+        else:
+            add_timeline_log(
+                "🔄 라이브 최신 데이터 수집 시작" if is_live else "🎯 1단계: 시점 감지 및 쿼리 생성",
+                "현재 시점 기준 최신 웹 트렌드 감지 중..." if is_live else "질의어에서 시점을 감지하고 시장 전망 수치 타겟팅 쿼리를 생성 중..."
+            )
+            prompt_system = "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."
+
         keyword_prompt = ChatPromptTemplate.from_messages([
-            ("system", "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."),
+            ("system", prompt_system),
             ("user", "대상 시점: {target_period}\n사용자 질문: {query}")
         ])
         raw_keyword_res = (keyword_prompt | llm).invoke({"target_period": target_period, "query": query_text}).content.strip()
@@ -360,10 +366,22 @@ def create_docuscout_graph():
         return {"report": report_res.content}
 
     def evaluate_sources(state: AgentState):
-        if len(state["filtered_sources"]) < 3 and state.get("retry_count", 0) < 1:
-            state["retry_count"] = state.get("retry_count", 0) + 1
-            add_timeline_log("🔄 자가 수정 루프", "수집된 팩트가 부족하여 검색 전략을 재조합하여 재탐색합니다.")
-            return "retry"
+        filtered_count = len(state["filtered_sources"])
+        retry_count = state.get("retry_count", 0)
+        
+        # 유효한 팩트 소스가 3개 미만이고 재시도 횟수가 1회 미만인 경우 자가 수정 루프 발동
+        if filtered_count < 3 and retry_count < 1:
+            state["retry_count"] = retry_count + 1
+            add_timeline_log(
+                "🔄 자가 수정 루프 발동 (Self-Correction)", 
+                f"1차 수집된 객관적 팩트가 {filtered_count}건으로 부족하여, 에이전트가 키워드를 재조합하여 재탐색을 시작합니다. (재시도 1회차)"
+            )
+            return "retry" # 플래너로 되돌아감
+            
+        add_timeline_log(
+            "✅ 팩트 검증 완료", 
+            f"유효한 팩트 소스 {filtered_count}건이 확보되어 최종 리포트 작성을 시작합니다."
+        )
         return "synthesize"
 
     workflow.add_node("planner", planner_node)
@@ -378,8 +396,8 @@ def create_docuscout_graph():
         "filter",
         evaluate_sources,
         {
-            "retry": "search",
-            "synthesize": "synthesizer"
+            "retry": "planner",       # 부족하면 플래너로 돌아가 키워드 재조합 후 재검색 수행 (Loop)
+            "synthesize": "synthesizer" # 충분하면 리포트 작성으로 진행
         }
     )
     workflow.add_edge("synthesizer", END)
@@ -424,10 +442,10 @@ st.markdown("""
         <div class="brand-logo">
             <div class="brand-icon">🕵️‍♂️</div>
             <span>DocuScout</span>
-            <span style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;">AI Pro 3.1 (LangGraph)</span>
+            <span style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;">AI Agent Pro (LangGraph)</span>
         </div>
         <div class="status-chip">
-            <span>●</span> Agent Graph Ready
+            <span>●</span> Self-Correction Active
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -450,7 +468,7 @@ with st.form(key="search_form"):
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
 
 if submit_btn and user_query:
-    with st.spinner("🔄 LangGraph 에이전트 워크플로우를 실행 중입니다..."):
+    with st.spinner("🔄 LangGraph 자가 수정 에이전트 파이프라인을 실행 중입니다..."):
         run_docuscout_pipeline(user_query, is_live_refresh=False)
 
 # =====================================================================
