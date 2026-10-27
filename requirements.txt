@@ -2,5 +2,6 @@ streamlit
 tavily-python
 langchain-openai
 langchain-core
+langgraph
 python-dotenv
 markdown
