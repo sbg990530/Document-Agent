@@ -226,6 +226,8 @@ if "raw_fetched_count" not in st.session_state:
     st.session_state.raw_fetched_count = 20
 if "noise_filtered_count" not in st.session_state:
     st.session_state.noise_filtered_count = 14
+if "target_period" not in st.session_state:
+    st.session_state.target_period = "현재"
 
 # =====================================================================
 # ⚙️ LangGraph 에이전트 자가 수정(Self-Correction) 파이프라인 구조
@@ -369,14 +371,13 @@ def create_docuscout_graph():
         filtered_count = len(state["filtered_sources"])
         retry_count = state.get("retry_count", 0)
         
-        # 유효한 팩트 소스가 15개 미만이고 재시도 횟수가 1회 미만인 경우 자가 수정 루프 발동
-        if filtered_count < 15 and retry_count < 1:
+        if filtered_count < 3 and retry_count < 1:
             state["retry_count"] = retry_count + 1
             add_timeline_log(
                 "🔄 자가 수정 루프 발동 (Self-Correction)", 
                 f"1차 수집된 객관적 팩트가 {filtered_count}건으로 부족하여, 에이전트가 키워드를 재조합하여 재탐색을 시작합니다. (재시도 1회차)"
             )
-            return "retry" # 플래너로 되돌아감
+            return "retry"
             
         add_timeline_log(
             "✅ 팩트 검증 완료", 
@@ -396,8 +397,8 @@ def create_docuscout_graph():
         "filter",
         evaluate_sources,
         {
-            "retry": "planner",       # 부족하면 플래너로 돌아가 키워드 재조합 후 재검색 수행 (Loop)
-            "synthesize": "synthesizer" # 충분하면 리포트 작성으로 진행
+            "retry": "planner",
+            "synthesize": "synthesizer"
         }
     )
     workflow.add_edge("synthesizer", END)
@@ -411,6 +412,9 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
 
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     target_period = year_match.group(0) if year_match else datetime.now(KST).strftime("%Y년 %m월")
+    
+    # target_period를 세션 상태에 저장하여 대시보드 미니 카드에서 활용
+    st.session_state.target_period = target_period
 
     app_graph = create_docuscout_graph()
     initial_state = {
@@ -492,6 +496,16 @@ if st.session_state.report_data:
                     mime="text/plain",
                     use_container_width=True
                 )
+
+            # 🌟 [시각화 보강] 리포트 상단 미니멀 KPI 메트릭 카드 추가 (복잡하지 않게 직관적 요약 제공)
+            k1, k2, k3 = st.columns(3)
+            with k1:
+                st.metric(label="🎯 분석 타겟 시점", value=st.session_state.get("target_period", "현재"))
+            with k2:
+                st.metric(label="📚 검증된 팩트 소스", value=f"{len(st.session_state.sources_data)}건")
+            with k3:
+                st.metric(label="🛡️ 노이즈 차단 완료", value=f"{st.session_state.get('noise_filtered_count', 14)}건 스팸 정제")
+            st.markdown("---")
 
             with st.container(border=True):
                 st.markdown(st.session_state.report_data)
