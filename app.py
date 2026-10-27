@@ -369,8 +369,8 @@ def create_docuscout_graph():
         filtered_count = len(state["filtered_sources"])
         retry_count = state.get("retry_count", 0)
         
-        # 유효한 팩트 소스가 3개 미만이고 재시도 횟수가 1회 미만인 경우 자가 수정 루프 발동
-        if filtered_count < 3 and retry_count < 1:
+        # 유효한 팩트 소스가 15개 미만이고 재시도 횟수가 1회 미만인 경우 자가 수정 루프 발동
+        if filtered_count < 15 and retry_count < 1:
             state["retry_count"] = retry_count + 1
             add_timeline_log(
                 "🔄 자가 수정 루프 발동 (Self-Correction)", 
