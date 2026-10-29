@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 🎨 라이트 아로라 테마 및 UI 커스텀 CSS (사이드바 히스토리 UI 세련되게 개선)
+# 🎨 라이트 아로라 테마 및 UI 커스텀 CSS (사이드바 히스토리 UI 초슬림 세련되게 개선)
 st.markdown("""
     <style>
     /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
@@ -158,21 +158,24 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 🌟 사이드바 전용 버튼 스타일 (크기 축소, 깔끔한 글자크기 및 모던 리스트 UI) */
+    /* 🌟 사이드바 히스토리 버튼 전용 스타일 (초슬림 & 컴팩트하게 정돈) */
     [data-testid="stSidebar"] div.stButton > button {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         color: #475569 !important;
         -webkit-text-fill-color: #475569 !important;
         border: 1px solid rgba(226, 232, 240, 0.9) !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
-        height: 38px !important;
-        padding: 0px 12px !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        border-radius: 8px !important;
+        font-weight: 400 !important;
+        font-size: 0.8rem !important;
+        height: 32px !important;
+        padding: 0px 10px !important;
+        transition: all 0.15s ease !important;
+        box-shadow: none !important;
         text-align: left !important;
         justify-content: flex-start !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
     [data-testid="stSidebar"] div.stButton > button:hover {
         background: #f8fafc !important;
@@ -180,7 +183,6 @@ st.markdown("""
         color: #4f46e5 !important;
         -webkit-text-fill-color: #4f46e5 !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 3px 10px rgba(99, 102, 241, 0.1) !important;
     }
 
     /* 출처 카드 */
@@ -539,7 +541,7 @@ def open_source_modal(src_item, score):
     st.info(src_item['content'])
 
 # =====================================================================
-# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원 (아이콘 및 UI 정돈)
+# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원 (초슬림 모던 리스트 UI)
 # =====================================================================
 with st.sidebar:
     st.markdown("### 📜 검색 히스토리")
@@ -559,8 +561,8 @@ with st.sidebar:
         st.info("아직 검색 기록이 없습니다.")
     else:
         for idx, hist in enumerate(reversed(st.session_state.search_history)):
-            display_title = hist['query'] if len(hist['query']) <= 18 else hist['query'][:16] + "..."
-            # 💡 아이콘을 깔끔한 말풍선/채팅 형태(💬)로 변경하여 가시성 개선
+            display_title = hist['query'] if len(hist['query']) <= 16 else hist['query'][:14] + "..."
+            # 💡 초슬림 한 줄 레이아웃 적용
             if st.button(f"💬 {display_title}", key=f"history_btn_{idx}", use_container_width=True):
                 st.session_state.report_data = hist["report"]
                 st.session_state.sources_data = hist["sources"]
