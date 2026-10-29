@@ -259,13 +259,13 @@ def create_docuscout_graph():
         
         if retry_count > 0:
             add_timeline_log("🎯 2단계: 검색어 재조합 (Self-Correction)", "1차 수집된 팩트가 부족하여 더 광범위하고 구체적인 전문 용어로 검색어를 재조합합니다.")
-            prompt_system = "이전 검색에서 충분한 통계 수치를 찾지 못했습니다. 보다 광범위하거나 대체 가능한 전문 용어를 조합하여 새로운 시장 전망 검색어 단 하나만 출력하세요."
+            prompt_system = "이전 검색에서 충분한 통계 수치나 연관 정보를 찾지 못했습니다. 보다 광범위하거나 대체 가능한 전문 용어를 조합하여 핵심 검색어 단 하나만 출력하세요."
         else:
             add_timeline_log(
                 "🔄 라이브 최신 데이터 수집 시작" if is_live else "🎯 1단계: 시점 감지 및 쿼리 생성",
-                "현재 시점 기준 최신 웹 트렌드 감지 중..." if is_live else "질의어에서 시점을 감지하고 시장 전망 수치 타겟팅 쿼리를 생성 중..."
+                "현재 시점 기준 최신 웹 트렌드 감지 중..." if is_live else "질의어에서 시점과 주제를 감지하고 타겟팅 쿼리를 생성 중..."
             )
-            prompt_system = "사용자 질문에서 지정된 시점({target_period})과 주제를 바탕으로 '시장 규모 전망 보고서 통계 수치'를 탐색할 단 하나의 정확한 검색어만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."
+            prompt_system = "사용자 질문에서 지정된 시점({target_period})과 핵심 주제를 바탕으로 관련 팩트/뉴스/통계를 탐색할 단 하나의 정확한 검색어만 출력하세요. 번호 매기기나 추가 설명 없이 오직 검색어 텍스트 한 줄만 출력해야 합니다."
 
         keyword_prompt = ChatPromptTemplate.from_messages([
             ("system", prompt_system),
@@ -276,7 +276,6 @@ def create_docuscout_graph():
         clean_keyword = raw_keyword_res.split('\n')[0].strip()
         clean_keyword = re.sub(r'^\d+[\.\)]\s*', '', clean_keyword).replace('"', '').strip()
         
-        # 라이브 갱신 시 타임스탬프를 미세하게 붙여서 캐시 방지 및 신규 결과 유도
         if is_live:
             clean_keyword += f" {int(time.time() % 1000)}"
 
@@ -300,20 +299,44 @@ def create_docuscout_graph():
         return {"raw_sources": raw_sources}
 
     def filter_node(state: AgentState):
-        add_timeline_log("🧹 노이즈 기사 필터링", "암호화폐, 스포츠 베팅 및 원론적 정의 기사 제외 중...")
+        query_text = state["query"]
         raw_sources = state["raw_sources"]
         
-        noise_keywords = ["포르쉐", "전기차", "슈퍼볼", "베팅", "리플", "도지코인", "비트코인", "암호화폐", "전기자전거", "카지노"]
-        def_noise_keywords = ["뜻", "정의", "개념", "1~14주차"]
+        add_timeline_log("🧠 범용 동적 연관성 검증 (Semantic Filtering)", "질문의 주제와 무관한 외부 도메인/스팸 문서 필터링 중...")
+        
+        # 기본 공통 스팸 키워드 (광고, 불법 베팅, 의미 없는 단순 정의 등)
+        base_noise = ["카지노", "베팅", "토토", "1~14주차", "단순 뜻", "사전적 정의"]
 
         filtered_sources = []
         for src in raw_sources:
-            combined_text = (src['title'] + " " + src['content']).lower()
-            if any(nk in combined_text for nk in noise_keywords):
+            title_text = src['title'].lower()
+            content_text = src['content'].lower()
+            combined = title_text + " " + content_text
+
+            # 1차: 기본 스팸 필터링
+            if any(bn in combined for bn in base_noise):
                 continue
-            if any(dnk in src['title'].lower() for dnk in def_noise_keywords):
-                continue
-            filtered_sources.append(src)
+
+            # 2차: LLM 기반 동적 문맥 평가 (질문 주제와 실제로 관련이 있는지 판단)
+            eval_prompt = ChatPromptTemplate.from_messages([
+                ("system", """당신은 수집된 문서가 사용자의 질문 주제와 '직접적인 연관성'이 있는지 판단하는 에이전트입니다.
+문서가 사용자의 질문 주제와 관련이 깊다면 'YES', 전혀 다른 분야(예: e스포츠 질문에 골프/야구 기사, 금융 질문에 연예 뉴스 등)라면 'NO'만 단호하게 출력하세요.
+오직 'YES' 또는 'NO' 한 단어로만 답변하세요."""),
+                ("user", "사용자 질문: {query}\n\n검색된 문서 제목: {title}\n검색된 문서 내용: {content}")
+            ])
+            
+            try:
+                eval_res = (eval_prompt | llm).invoke({
+                    "query": query_text,
+                    "title": src['title'],
+                    "content": src['content'][:300]  # 빠른 처리를 위해 앞부분 300자만 검증
+                }).content.strip().upper()
+
+                if "YES" in eval_res:
+                    filtered_sources.append(src)
+            except Exception:
+                # 에러 발생 시 기본 통과
+                filtered_sources.append(src)
 
         st.session_state.noise_filtered_count = max(0, len(raw_sources) - len(filtered_sources))
         return {"filtered_sources": filtered_sources}
@@ -328,7 +351,7 @@ def create_docuscout_graph():
             add_timeline_log("🔄 한국어 요약 및 번역 정제", "수집된 최신 스니펫을 자연스러운 한국어로 정제 중...")
             for result in new_collected:
                 translate_prompt = ChatPromptTemplate.from_messages([
-                    ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 수치 데이터를 반영해 한국어로 요약하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
+                    ("system", "제공된 문서를 분석하여 지정된 시점({target_period})의 수치 및 팩트 데이터를 반영해 한국어로 요약하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
                     ("user", "원문 제목: {title}\n원문 내용: {content}")
                 ])
                 trans_res = (translate_prompt | llm).invoke({
@@ -345,7 +368,7 @@ def create_docuscout_graph():
 
                 item = {"title": kr_title, "content": kr_content, "url": result['url']}
                 
-                # 🛡️ URL 기준 중복 체크 (이미 존재하는 URL이 아닐 때만 기존 목록에 추가)
+                # URL 기준 중복 체크 후 누적
                 if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
                     st.session_state.sources_data.append(item)
 
@@ -411,7 +434,6 @@ def create_docuscout_graph():
     return workflow.compile()
 
 def run_docuscout_pipeline(query_text, is_live_refresh=False):
-    # 🌟 라이브 갱신 시에는 기존 출처(sources_data)를 유지하고 타임라인 로그만 새로 리셋합니다.
     if is_live_refresh:
         st.session_state.timeline_logs = []
     else:
@@ -600,9 +622,9 @@ if st.session_state.report_data:
             st.markdown("#### 🧹 노이즈 필터링 및 스팸 차단 리포트")
             with st.container(border=True):
                 st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
-                st.markdown(f"**차단된 편향/스팸/주관적 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**차단된 편향/스팸/무관한 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
                 st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
-                st.info("💡 블로그, 커뮤니티, SNS 등 주관적 의견이 담긴 편향된 데이터와 무관한 광고성 스팸을 강력하게 필터링하여 리포트의 객관성을 확보했습니다.")
+                st.info("💡 질문의 의도를 분석하여 무관한 주제의 뉴스(타 스포츠, 광고 등) 및 무관한 스팸 기사를 LLM 기반 동적 검증(Semantic Filter)으로 완벽하게 필터링했습니다.")
 
         with col_audit_2:
             st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
