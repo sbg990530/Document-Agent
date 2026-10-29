@@ -135,8 +135,7 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* 버튼 스타일 및 가시성 강제 고정 */
-    div.stButton > button, 
+    /* 메인 화면 실행/다운로드 버튼 스타일 */
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
@@ -150,7 +149,6 @@ st.markdown("""
         transition: all 0.25s ease !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
     }
-    div.stButton > button:hover, 
     div.stFormSubmitButton > button:hover, 
     div.stDownloadButton > button:hover {
         transform: translateY(-2px) !important;
@@ -158,6 +156,28 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
+    }
+
+    /* 🌟 사이드바 전용 버튼 스타일 (모던한 SaaS 리스트 카드형태로 개선) */
+    [data-testid="stSidebar"] div.stButton > button {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #334155 !important;
+        -webkit-text-fill-color: #334155 !important;
+        border: 1px solid rgba(203, 213, 225, 0.8) !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        height: 42px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+    }
+    [data-testid="stSidebar"] div.stButton > button:hover {
+        background: #ffffff !important;
+        border-color: #6366f1 !important;
+        color: #4f46e5 !important;
+        -webkit-text-fill-color: #4f46e5 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12) !important;
     }
 
     /* 출처 카드 */
@@ -516,7 +536,7 @@ def open_source_modal(src_item, score):
     st.info(src_item['content'])
 
 # =====================================================================
-# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원
+# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원 (모던 리스트 UI 적용)
 # =====================================================================
 with st.sidebar:
     st.markdown("### 📜 검색 히스토리")
@@ -536,7 +556,7 @@ with st.sidebar:
         st.info("아직 검색 기록이 없습니다.")
     else:
         for idx, hist in enumerate(reversed(st.session_state.search_history)):
-            display_title = hist['query'] if len(hist['query']) <= 22 else hist['query'][:20] + "..."
+            display_title = hist['query'] if len(hist['query']) <= 20 else hist['query'][:18] + "..."
             if st.button(f"📌 {display_title}", key=f"history_btn_{idx}", use_container_width=True):
                 st.session_state.report_data = hist["report"]
                 st.session_state.sources_data = hist["sources"]
