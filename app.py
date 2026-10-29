@@ -419,7 +419,7 @@ def create_docuscout_graph():
 
 목차:
 1. 개요
-2. 주요 팩트 및 통계 (공인 API 데이터 100% 반영)
+2. 주요 팩트 및 통계
 3. 시사점 및 전망"""),
             ("user", """대상 시점: {target_period}
             
