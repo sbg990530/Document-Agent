@@ -10,12 +10,12 @@ from langchain_core.prompts import ChatPromptTemplate
 from typing import TypedDict, List
 from langgraph.graph import StateGraph, END
 
-# 🌐 웹페이지 기본 설정 (Wide 레이아웃)
+# 🌐 웹페이지 기본 설정 (히스토리 확인을 위해 사이드바 기본 확장)
 st.set_page_config(
     page_title="DocuScout - Interactive AI Intelligence Agent",
     page_icon="🕵️‍♂️",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # 🎨 라이트 아로라 테마 및 UI 커스텀 CSS
@@ -229,6 +229,8 @@ if "noise_filtered_count" not in st.session_state:
     st.session_state.noise_filtered_count = 14
 if "current_user_query" not in st.session_state:
     st.session_state.current_user_query = ""
+if "search_history" not in st.session_state:
+    st.session_state.search_history = []
 
 # =====================================================================
 # ⚙️ LangGraph 에이전트 자가 수정(Self-Correction) 파이프라인 구조
@@ -514,6 +516,41 @@ def open_source_modal(src_item, score):
     st.info(src_item['content'])
 
 # =====================================================================
+# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원
+# =====================================================================
+with st.sidebar:
+    st.markdown("### 📜 검색 히스토리")
+    st.caption("이전에 검색했던 리포트 목록입니다.")
+    
+    if st.button("✨ 새 리서치 시작하기", use_container_width=True):
+        st.session_state.report_data = None
+        st.session_state.sources_data = []
+        st.session_state.followup_data = None
+        st.session_state.current_user_query = ""
+        st.session_state.timeline_logs = []
+        st.rerun()
+
+    st.markdown("---")
+
+    if not st.session_state.search_history:
+        st.info("아직 검색 기록이 없습니다.")
+    else:
+        for idx, hist in enumerate(reversed(st.session_state.search_history)):
+            display_title = hist['query'] if len(hist['query']) <= 22 else hist['query'][:20] + "..."
+            if st.button(f"📌 {display_title}", key=f"history_btn_{idx}", use_container_width=True):
+                st.session_state.report_data = hist["report"]
+                st.session_state.sources_data = hist["sources"]
+                st.session_state.followup_data = hist["followup"]
+                st.session_state.auto_keyword = hist["keyword"]
+                st.session_state.current_user_query = hist["query"]
+                st.rerun()
+        
+        st.markdown("")
+        if st.button("🗑️ 전체 히스토리 지우기", use_container_width=True):
+            st.session_state.search_history = []
+            st.rerun()
+
+# =====================================================================
 # 1. 상단 네비바
 # =====================================================================
 st.markdown("""
@@ -550,6 +587,17 @@ if submit_btn and user_query:
     st.session_state.current_user_query = user_query
     with st.spinner("🔄 범용 하이브리드 LangGraph 파이프라인을 실행 중입니다..."):
         run_docuscout_pipeline(user_query, is_live_refresh=False)
+        
+        # 검색 성공 시 히스토리에 자동 추가 (중복 방지)
+        history_item = {
+            "query": user_query,
+            "report": st.session_state.report_data,
+            "sources": list(st.session_state.sources_data),
+            "followup": st.session_state.followup_data,
+            "keyword": st.session_state.auto_keyword
+        }
+        if not st.session_state.search_history or st.session_state.search_history[-1]["query"] != user_query:
+            st.session_state.search_history.append(history_item)
 
 # =====================================================================
 # 3. 결과 출력 및 탭 시스템
