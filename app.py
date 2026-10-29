@@ -567,24 +567,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 통합 st.form (질의어 입력창 초기화 적용)
+# 2. 통합 st.form (key 바인딩 적용으로 입력값 유실 문제 해결)
 # =====================================================================
 with st.form(key="search_form"):
     st.markdown('<div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
     
     col_s1, col_s2 = st.columns([5, 1.2])
     with col_s1:
-        user_query = st.text_input(
+        st.text_input(
             "질의어 입력", 
-            value=st.session_state.current_user_query, 
+            key="current_user_query", 
             placeholder="예: 2027년 반도체 시장 규모 전망 분석해줘", 
             label_visibility="collapsed"
         )
     with col_s2:
         submit_btn = st.form_submit_button("🚀 스카우트 실행", use_container_width=True)
 
-if submit_btn and user_query:
-    st.session_state.current_user_query = user_query
+if submit_btn and st.session_state.current_user_query:
+    user_query = st.session_state.current_user_query
     with st.spinner("🔄 범용 하이브리드 LangGraph 파이프라인을 실행 중입니다..."):
         run_docuscout_pipeline(user_query, is_live_refresh=False)
         
