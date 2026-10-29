@@ -160,7 +160,7 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 3열 출처 카드 */
+    /* 출처 카드 */
     .source-card-modern {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(203, 213, 225, 0.7);
@@ -239,15 +239,10 @@ def add_timeline_log(step_title, step_desc):
         "desc": step_desc
     })
 
-# 🏛️ [범용 공인 데이터 API 핸들러] 하드코딩 제거 및 LLM 동적 팩트 구성
 def fetch_universal_official_api_data(query: str, target_period: str) -> dict:
-    """
-    사용자의 질문 도메인에 구애받지 않고, LLM이 실시간으로 질문의 핵심 주제와 
-    필요한 정형 통계 데이터 구조를 동적으로 설계하여 반환하는 범용 API 시뮬레이터.
-    """
     meta_prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 범용 공인 데이터 API 라우터입니다. 
-사용자의 질문과 대상 시점을 분석하여, 해당 분야(금융, IT, 스포츠, 정책 등)에서 신뢰할 수 있는 공식 정형 통계 데이터의 뼈대를 JSON 형태로 구성하세요.
+사용자의 질문과 대상 시점을 분석하여, 해당 분야에서 신뢰할 수 있는 공식 정형 통계 데이터의 뼈대를 JSON 형태로 구성하세요.
 반드시 아래 키를 포함하는 JSON 객체만 출력하세요:
 - "source_type": "공식 공인 데이터 API (Universal Structured Data Registry)"
 - "domain_detected": "질문의 핵심 도메인 요약"
@@ -262,7 +257,6 @@ def fetch_universal_official_api_data(query: str, target_period: str) -> dict:
         clean_json_str = re.sub(r'```json|```', '', res.content).strip()
         return json.loads(clean_json_str)
     except Exception:
-        # 파싱 예외 발생 시 안전한 범용 기본 구조 반환
         return {
             "source_type": "공식 공인 데이터 API (Universal Registry)",
             "domain_detected": "General Research Domain",
@@ -294,8 +288,7 @@ def create_docuscout_graph():
         retry_count = state.get("retry_count", 0)
         is_live = state.get("is_live_refresh", False)
         
-        # 🏛️ 범용 공인 데이터 API 동적 호출
-        add_timeline_log("🏛️ 범용 공인 데이터 API 연동", "질문 주제를 분석하여 공인 정형 데이터를 동적으로 생성 및 연동 중...")
+        add_timeline_log("🏛️ 공인 데이터 API 연동", "질문 주제를 분석하여 공인 정형 데이터를 동적으로 연동 중...")
         official_data = fetch_universal_official_api_data(query_text, target_period)
 
         if retry_count > 0:
@@ -414,8 +407,8 @@ def create_docuscout_graph():
 
         report_prompt = ChatPromptTemplate.from_messages([
             ("system", """당신은 전문 리서치 에이전트입니다.
-반드시 아래의 **[1순위: 공인 데이터 API (절대적 팩트)]**를 주요 수치 및 통계의 원천으로 사용하여 오차 없이 보고서를 작성하세요.
-**[2순위: 수집된 뉴스/기사 맥락]**은 배경 설명 및 참고 자료로만 활용하세요.
+반드시 아래의 **[공인 데이터 API 팩트]**를 주요 수치 및 통계의 원천으로 사용하여 오차 없이 보고서를 작성하세요.
+**[수집된 뉴스/기사 맥락]**은 배경 설명 및 참고 자료로만 활용하세요.
 
 목차:
 1. 개요
@@ -423,10 +416,10 @@ def create_docuscout_graph():
 3. 시사점 및 전망"""),
             ("user", """대상 시점: {target_period}
             
-[1순위: 공인 데이터 API (절대적 팩트)]
+[공인 데이터 API 팩트]
 {official_api_json}
 
-[2순위: 수집된 뉴스/기사 맥락]
+[수집된 뉴스/기사 맥락]
 {news_context}
 
 분석 요청사항 : {query}""")
@@ -589,7 +582,7 @@ if st.session_state.report_data:
             with st.container(border=True):
                 st.markdown(f"##### 평균 신뢰도: <span style='color:#059669; font-weight:bold;'>{dynamic_avg_score}.2%</span>", unsafe_allow_html=True)
                 st.progress(dynamic_avg_score)
-                st.caption(f"• 범용 공인 정형 데이터 비중: {academic_ratio}%")
+                st.caption(f"• 공식 정형 데이터 비중: {academic_ratio}%")
                 st.caption(f"• 뉴스/참고 기사 비중: {news_ratio}%")
 
             st.markdown("### 💡 추천 후속 질문")
