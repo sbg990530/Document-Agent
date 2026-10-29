@@ -275,6 +275,11 @@ def create_docuscout_graph():
         
         clean_keyword = raw_keyword_res.split('\n')[0].strip()
         clean_keyword = re.sub(r'^\d+[\.\)]\s*', '', clean_keyword).replace('"', '').strip()
+        
+        # 라이브 갱신 시 타임스탬프를 미세하게 붙여서 캐시 방지 및 신규 결과 유도
+        if is_live:
+            clean_keyword += f" {int(time.time() % 1000)}"
+
         st.session_state.auto_keyword = clean_keyword
 
         add_timeline_log("🔍 키워드 추출 완료", f"타겟팅 검색 키워드: '{clean_keyword}'")
@@ -340,7 +345,7 @@ def create_docuscout_graph():
 
                 item = {"title": kr_title, "content": kr_content, "url": result['url']}
                 
-                # 🛡️ [수정됨] URL 기준 엄격한 중복 체크 (이미 존재하는 URL이면 추가 안 함)
+                # 🛡️ URL 기준 중복 체크 (이미 존재하는 URL이 아닐 때만 기존 목록에 추가)
                 if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
                     st.session_state.sources_data.append(item)
 
@@ -406,7 +411,10 @@ def create_docuscout_graph():
     return workflow.compile()
 
 def run_docuscout_pipeline(query_text, is_live_refresh=False):
-    if not is_live_refresh:
+    # 🌟 라이브 갱신 시에는 기존 출처(sources_data)를 유지하고 타임라인 로그만 새로 리셋합니다.
+    if is_live_refresh:
+        st.session_state.timeline_logs = []
+    else:
         st.session_state.timeline_logs = []
         st.session_state.sources_data = []
 
