@@ -339,7 +339,9 @@ def create_docuscout_graph():
                 kr_content = content_match.group(1).strip() if content_match else result['content']
 
                 item = {"title": kr_title, "content": kr_content, "url": result['url']}
-                if item not in st.session_state.sources_data:
+                
+                # 🛡️ [수정됨] URL 기준 엄격한 중복 체크 (이미 존재하는 URL이면 추가 안 함)
+                if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
                     st.session_state.sources_data.append(item)
 
             add_timeline_log("✅ 라이브 수집 완료", f"신규 최신 출처 데이터가 타임라인에 추가되었습니다!")
