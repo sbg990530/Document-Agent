@@ -10,7 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from typing import TypedDict, List
 from langgraph.graph import StateGraph, END
 
-# 🌐 웹페이지 기본 설정 (히스토리 확인을 위해 사이드바 기본 확장)
+# 🌐 웹페이지 기본 설정
 st.set_page_config(
     page_title="DocuScout - Interactive AI Intelligence Agent",
     page_icon="🕵️‍♂️",
@@ -18,10 +18,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 🎨 라이트 아로라 테마 및 UI 커스텀 CSS (사이드바 히스토리 UI 초슬림 세련되게 개선)
+# 🎨 커스텀 CSS (사이드바 히스토리 UI 초슬림 세련되게 개선)
 st.markdown("""
     <style>
-    /* 전체 배경: 화사하고 청량한 프리미엄 라이트 오로라 그라데이션 */
     .stApp {
         background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
                     radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
@@ -30,7 +29,6 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* 상단 네비바 */
     .top-navbar {
         display: flex;
         justify-content: space-between;
@@ -76,7 +74,6 @@ st.markdown("""
         gap: 8px;
     }
 
-    /* 🌟 탭 내부 메인 타이틀 공통 스타일 클래스 */
     .tab-main-title {
         font-size: 1.6rem !important;
         font-weight: 800 !important;
@@ -88,7 +85,6 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
 
-    /* 🌟 st.expander (접이식 박스) 크기 및 글자 크기 대폭 확대 */
     [data-testid="stExpander"] {
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
@@ -105,7 +101,6 @@ st.markdown("""
         padding: 8px !important;
     }
 
-    /* st.form 박스 스타일 단일화 */
     [data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid rgba(203, 213, 225, 0.8) !important;
@@ -115,12 +110,10 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.06) !important;
     }
 
-    /* 각 탭 패널 상단 여백 설정 */
     [data-testid="stTabPanel"] {
         padding-top: 16px !important;
     }
 
-    /* 리포트 및 본문 글자 크기 가독성 */
     [data-testid="stMarkdownContainer"] p, 
     [data-testid="stMarkdownContainer"] li {
         font-size: 1.08rem !important;
@@ -135,7 +128,6 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* 메인 화면 실행/다운로드 버튼 스타일 */
     div.stFormSubmitButton > button, 
     div.stDownloadButton > button {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
@@ -158,7 +150,6 @@ st.markdown("""
         -webkit-text-fill-color: #ffffff !important;
     }
 
-    /* 🌟 사이드바 히스토리 버튼 전용 스타일 (초슬림 & 컴팩트하게 정돈) */
     [data-testid="stSidebar"] div.stButton > button {
         background: rgba(255, 255, 255, 0.9) !important;
         color: #475569 !important;
@@ -185,7 +176,6 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
 
-    /* 출처 카드 */
     .source-card-modern {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(203, 213, 225, 0.7);
@@ -232,7 +222,6 @@ except Exception:
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY, temperature=0)
 
-# 🌟 대한민국 표준시(KST, UTC+9) 정의
 KST = timezone(timedelta(hours=9))
 
 # =====================================================================
@@ -256,6 +245,19 @@ if "current_user_query" not in st.session_state:
     st.session_state.current_user_query = ""
 if "search_history" not in st.session_state:
     st.session_state.search_history = []
+if "latest_timestamp_score" not in st.session_state:
+    st.session_state.latest_timestamp_score = 0  # 시점 비교용 점수 저장
+
+# ⏱️ 문서 내 날짜 파싱 헬퍼 함수
+def extract_date_score(text: str) -> int:
+    """텍스트 내 날짜(YYYY-MM-DD 또는 YYYY년 MM월)를 감지하여 비교 가능한 점수로 환산"""
+    match = re.search(r'(\d{4})[\.\-년\s]+(\d{1,2})[\.\-월\s]*(\d{1,2})?', text)
+    if match:
+        year = int(match.group(1))
+        month = int(match.group(2))
+        day = int(match.group(3)) if match.group(3) else 1
+        return year * 10000 + month * 100 + day
+    return 0
 
 # =====================================================================
 # ⚙️ LangGraph 에이전트 파이프라인 구조
@@ -363,7 +365,7 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터 (모바일 서브도메인 포함)
+        # 🛡️ URL 블랙리스트 필터링
         blocked_keywords = [
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
@@ -384,12 +386,15 @@ def create_docuscout_graph():
     def filter_node(state: AgentState):
         query_text = state["query"]
         raw_sources = state["raw_sources"]
+        is_live = state.get("is_live_refresh", False)
         
-        add_timeline_log("🧠 범용 동적 연관성 검증 (Semantic Filtering)", "질문의 주제와 무관한 외부 도메인/스팸 뉴스 필터링 중...")
+        add_timeline_log("🧠 최신성(Recency) 검증 및 연관성 필터링", "기존 데이터 시점보다 과거인 자료는 차단하고 최신 팩트만 선별 중...")
         
         base_noise = ["카지노", "베팅", "토토", "1~14주차", "단순 뜻", "사전적 정의"]
 
         filtered_sources = []
+        max_new_score = st.session_state.latest_timestamp_score
+
         for src in raw_sources:
             title_text = src['title'].lower()
             content_text = src['content'].lower()
@@ -397,6 +402,17 @@ def create_docuscout_graph():
 
             if any(bn in combined for bn in base_noise):
                 continue
+
+            # 🛡️ [핵심] 시점 파싱 및 과거 시점 차단 (Recency Guard)
+            doc_date_score = extract_date_score(combined)
+            
+            # 라이브 갱신 시 기존 수집 자료 시점보다 오래된 자료는 차단
+            if is_live and doc_date_score > 0 and st.session_state.latest_timestamp_score > 0:
+                if doc_date_score < st.session_state.latest_timestamp_score:
+                    continue # 기존 최신 시점보다 이전 자료면 거름
+
+            if doc_date_score > max_new_score:
+                max_new_score = doc_date_score
 
             eval_prompt = ChatPromptTemplate.from_messages([
                 ("system", "수집된 뉴스가 질문 주제와 연관이 있다면 'YES', 전혀 다른 주제라면 'NO'만 답변하세요."),
@@ -415,6 +431,8 @@ def create_docuscout_graph():
             except Exception:
                 filtered_sources.append(src)
 
+        # 최신 시점 스코어 갱신
+        st.session_state.latest_timestamp_score = max_new_score
         st.session_state.noise_filtered_count = max(0, len(raw_sources) - len(filtered_sources))
         return {"filtered_sources": filtered_sources}
 
@@ -426,7 +444,7 @@ def create_docuscout_graph():
         new_collected = filtered_sources[:6] if filtered_sources else state["raw_sources"][:6]
 
         if new_collected:
-            add_timeline_log("🔄 한국어 요약 및 번역 정제", "수집된 최신 스니펫을 근거 자료용으로 정제 중...")
+            add_timeline_log("🔄 한국어 요약 및 최신 팩트 정제", "수집된 최신 스니펫을 근거 자료용으로 정제 중...")
             for result in new_collected:
                 translate_prompt = ChatPromptTemplate.from_messages([
                     ("system", "뉴스 기사를 분석하여 한국어로 요약하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
@@ -445,10 +463,11 @@ def create_docuscout_graph():
 
                 item = {"title": kr_title, "content": kr_content, "url": result['url']}
                 
+                # 중복 및 과거 소스 방지하며 최신 소스를 상단에 삽입
                 if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
-                    st.session_state.sources_data.append(item)
+                    st.session_state.sources_data.insert(0, item)
 
-        add_timeline_log("🤖 하이브리드 리포트 작성", "공인 API 정형 팩트를 1순위로 하여 보고서 작성 중...")
+        add_timeline_log("🤖 하이브리드 리포트 작성", "최신 정제 팩트를 반영하여 리포트 재작성 중...")
         
         news_context = ""
         for idx, result in enumerate(st.session_state.sources_data[:6], 1):
@@ -457,7 +476,7 @@ def create_docuscout_graph():
         report_prompt = ChatPromptTemplate.from_messages([
             ("system", """당신은 전문 리서치 에이전트입니다.
 반드시 아래의 **[공인 데이터 API 팩트]**를 주요 수치 및 통계의 원천으로 사용하여 오차 없이 보고서를 작성하세요.
-**[수집된 뉴스/기사 맥락]**은 배경 설명 및 참고 자료로만 활용하세요.
+**[수집된 뉴스/기사 맥락]**은 최신 배경 설명 및 참고 자료로 활용하세요.
 
 목차:
 1. 개요
@@ -528,11 +547,11 @@ def create_docuscout_graph():
 
 def run_docuscout_pipeline(query_text, is_live_refresh=False):
     if is_live_refresh:
-        # 라이브 갱신 시 타임라인만 초기화하고 기존 소스에 최신 소스를 누적 반영
         st.session_state.timeline_logs = []
     else:
         st.session_state.timeline_logs = []
         st.session_state.sources_data = []
+        st.session_state.latest_timestamp_score = 0
 
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     target_period = year_match.group(0) if year_match else datetime.now(KST).strftime("%Y년 %m월")
@@ -562,7 +581,7 @@ def open_source_modal(src_item, score):
     st.info(src_item['content'])
 
 # =====================================================================
-# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원 (초슬림 모던 리스트 UI)
+# 🧭 좌측 사이드바: 검색 히스토리 및 세션 복원
 # =====================================================================
 with st.sidebar:
     st.markdown("### 📜 검색 히스토리")
@@ -574,6 +593,7 @@ with st.sidebar:
         st.session_state.followup_data = None
         st.session_state.current_user_query = ""
         st.session_state.timeline_logs = []
+        st.session_state.latest_timestamp_score = 0
         st.rerun()
 
     st.markdown("---")
@@ -613,7 +633,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. 통합 st.form (key 바인딩 적용으로 입력값 유실 문제 해결)
+# 2. 통합 st.form
 # =====================================================================
 with st.form(key="search_form"):
     st.markdown('<div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><span>🎯</span> AI 리서치 질의어 입력</div>', unsafe_allow_html=True)
@@ -634,7 +654,6 @@ if submit_btn and st.session_state.current_user_query:
     with st.spinner("🔄 범용 하이브리드 LangGraph 파이프라인을 실행 중입니다..."):
         run_docuscout_pipeline(user_query, is_live_refresh=False)
         
-        # 검색 성공 시 히스토리에 자동 추가 (중복 방지)
         history_item = {
             "query": user_query,
             "report": st.session_state.report_data,
@@ -727,10 +746,9 @@ if st.session_state.report_data:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 현재 시점 최신 자료를 누적 수집하고 리포트를 재작성하는 중..."):
-                    # 💡 라이브 갱신 시 파이프라인 전체를 다시 태워 리포트와 소스를 동시 갱신
+                with st.spinner("📡 과거 소스는 배제하고 최신 자료만 추려 리포트를 재작성 중..."):
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
-                    st.success("✨ 최신 데이터 수집 및 리포트 재작성이 완료되었습니다!")
+                    st.success("✨ 최신 데이터 검증 및 리포트 재작성이 완료되었습니다!")
                     time.sleep(0.8)
                     st.rerun()
 
@@ -745,10 +763,9 @@ if st.session_state.report_data:
         if st.session_state.sources_data:
             source_count = len(st.session_state.sources_data)
             with st.expander(f"📄 누적 수집된 Raw 데이터 목록 히스토리 (총 {source_count}건)", expanded=False):
-                for idx, src in enumerate(reversed(st.session_state.sources_data), 1):
-                    original_idx = source_count - idx + 1
+                for idx, src in enumerate(st.session_state.sources_data, 1):
                     with st.container(border=True):
-                        st.markdown(f"📌 **[{original_idx}] {src['title']}**")
+                        st.markdown(f"📌 **[{idx}] {src['title']}**")
                         st.markdown(f"**원문 링크:** [{src['url']}]({src['url']})")
                         st.write(src['content'])
 
@@ -758,7 +775,7 @@ if st.session_state.report_data:
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.2%", "+3.5% 최우수")
         m2.metric("공인 정형 데이터 비율", f"{academic_ratio}.0%", "할루시네이션 원천 차단")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "실시간 누적 중")
+        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "최신순 누적 중")
 
         st.markdown("---")
 
@@ -768,9 +785,9 @@ if st.session_state.report_data:
             st.markdown("#### 🧹 범용 하이브리드 필터링 리포트")
             with st.container(border=True):
                 st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
-                st.markdown(f"**차단된 편향/스팸/무관한 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**차단된 편향/스팸/과거 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
                 st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
-                st.info("💡 어떤 분야의 질문이든 LLM이 동적으로 공인 정형 팩트 구조를 설계하여 리포트 수치의 정확성을 높이고, 뉴스는 참고용 근거 카드로 활용합니다.")
+                st.info("💡 과거 시점 자료를 자동 추려내고 최신성(Recency) 조건을 만족하는 팩트 소스만 리포트에 반영합니다.")
 
         with col_audit_2:
             st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
@@ -791,4 +808,5 @@ if st.session_state.report_data:
         st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
             st.markdown("✅ **범용 공인 데이터 우선 반영:** 어떤 질문이든 도메인에 맞는 정형 팩트가 리포트 수치의 기준점이 됩니다.")
+            st.markdown("✅ **시점 가중치 필터링(Recency Guard):** 기존 수집 소스보다 이전 시점의 오래된 데이터는 자동 배제하여 최신성을 유지합니다.")
             st.markdown("✅ **원문 검증 미리보기 모달 지원:** 근거 자료 카드마다 미리보기 모달을 제공하여 사용자가 직접 원문을 확인할 수 있습니다.")
