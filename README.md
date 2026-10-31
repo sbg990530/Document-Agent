@@ -24,17 +24,38 @@ graph LR
     classDef synthStyle fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#000;
     classDef uiStyle fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px,color:#000;
 
-    A["&nbsp;&nbsp;&nbsp;&nbsp;👤 사용자 질의&nbsp;&nbsp;&nbsp;&nbsp;"]:::userStyle 
-    --> B["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧠 Planner Node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>· 질의 의도 분석<br/>· 공인 데이터 라우팅"]:::plannerStyle
-    
-    B --> C["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🛡️ Search & Filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>· 웹 검색 수행<br/>· 보안 및 가비지 필터"]:::filterStyle
-    
-    C --> D["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📅 Synthesizer Node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>· 최신순 정렬<br/>· 리포트 합성"]:::synthStyle
+    subgraph DocuScout Workflow
+        direction LR
+        A([👤 사용자 질의]):::userStyle 
+        
+        B["🧠 Planner Node
+        ━━━━━━━━━━━━━━━
+        · 질의 의도 분석
+        · 공인 데이터 라우팅"]:::plannerStyle
+        
+        C["🛡️ Search & Filter
+        ━━━━━━━━━━━━━━━
+        · 웹 검색 수행
+        · 보안 및 가비지 필터"]:::filterStyle
+        
+        D["📅 Synthesizer Node
+        ━━━━━━━━━━━━━━━
+        · 최신순 정렬
+        · 리포트 합성"]:::synthStyle
+        
+        E["📊 Streamlit UI
+        ━━━━━━━━━━━━━━━
+        · 3-Tab 대시보드
+        · 결과 출력"]:::uiStyle
+    end
+
+    A --> B
+    B --> C
+    C --> D
     
     %% 루프 및 분기 구조
     D -- "정보 부족 / 추가 탐색" --> B
-    
-    D -- "검증 완료" --> E["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📊 Streamlit UI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>· 3-Tab 대시보드<br/>· 결과 출력"]:::uiStyle
+    D -- "검증 완료" --> E
 ```
 * **범용 공인 데이터 API 다중 라우팅(`Planner Node`) :** 사용자의 질의 의도 및 시점 분석, 정형 통계 데이터 기반 리포트 신뢰도 수치 상승효과
 * **철저한 보안 및 노이즈 차단 아키텍처(`Search & Filter Node`) :** 유튜브 및 커뮤니티 도메인 배제, 가비지 데이터 필터링, 개인정보 보호
