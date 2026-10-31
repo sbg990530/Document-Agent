@@ -562,7 +562,6 @@ with st.sidebar:
     else:
         for idx, hist in enumerate(reversed(st.session_state.search_history)):
             display_title = hist['query'] if len(hist['query']) <= 16 else hist['query'][:14] + "..."
-            # 💡 초슬림 한 줄 레이아웃 적용
             if st.button(f"💬 {display_title}", key=f"history_btn_{idx}", use_container_width=True):
                 st.session_state.report_data = hist["report"]
                 st.session_state.sources_data = hist["sources"]
@@ -708,7 +707,8 @@ if st.session_state.report_data:
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
                 with st.spinner("📡 현재 시점 최신 자료를 누적 수집하는 중..."):
-                    run_docuscout_pipeline(user_query, is_live_refresh=True)
+                    # 💡 st.session_state.current_user_query를 직접 참조하도록 수정 완료
+                    run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
                     st.rerun()
 
         if st.session_state.timeline_logs:
