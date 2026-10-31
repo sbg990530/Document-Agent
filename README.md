@@ -27,22 +27,22 @@ graph LR
     A([👤 사용자 질의]):::userStyle 
     
     B["🧠 Planner Node
-    ━━━━━━━━━━━━
+    
     질의 의도 및 시점 분석
     공인 데이터 라우팅"]:::plannerStyle
     
     C["🛡️ Search & Filter
-    ━━━━━━━━━━━━
+    
     Tavily 웹 검색 수행
     가비지/유튜브 필터링"]:::filterStyle
     
     D["📅 Synthesizer Node
-    ━━━━━━━━━━━━
+    
     최신순 데이터 정렬
     근거 리포트 합성"]:::synthStyle
     
     E["📊 Streamlit UI
-    ━━━━━━━━━━━━
+    
     3-Tab 대시보드 출력
     세션 히스토리 복원"]:::uiStyle
 
