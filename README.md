@@ -26,13 +26,13 @@ graph LR
 
     A([👤 사용자 질의]):::userStyle 
     
-    B["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>🧠 Planner Node</b></td></tr><tr><td style='border-top: 1px solid #00ACC1; padding-top: 8px; text-align: left;'>• 질의 의도 및 시점 분석<br/>• 공인 데이터 라우팅</td></tr></table>"]:::plannerStyle
+    B["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>🧠 Planner Node</b></td></tr><tr><td style='border-top: 1px solid #00ACC1; padding-top: 8px; text-align: center;'><div style='display: inline-block; text-align: left;'>• 질의 의도 및 시점 분석<br/>• 공인 데이터 라우팅</div></td></tr></table>"]:::plannerStyle
     
-    C["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>🛡️ Search & Filter</b></td></tr><tr><td style='border-top: 1px solid #43A047; padding-top: 8px; text-align: left;'>• Tavily 웹 검색 수행<br/>• 가비지/유튜브 필터링</td></tr></table>"]:::filterStyle
+    C["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>🛡️ Search & Filter</b></td></tr><tr><td style='border-top: 1px solid #43A047; padding-top: 8px; text-align: center;'><div style='display: inline-block; text-align: left;'>• Tavily 웹 검색 수행<br/>• 가비지/유튜브 필터링</div></td></tr></table>"]:::filterStyle
     
-    D["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>📅 Synthesizer Node</b></td></tr><tr><td style='border-top: 1px solid #FB8C00; padding-top: 8px; text-align: left;'>• 최신순 데이터 정렬<br/>• 근거 리포트 합성</td></tr></table>"]:::synthStyle
+    D["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>📅 Synthesizer Node</b></td></tr><tr><td style='border-top: 1px solid #FB8C00; padding-top: 8px; text-align: center;'><div style='display: inline-block; text-align: left;'>• 최신순 데이터 정렬<br/>• 근거 리포트 합성</div></td></tr></table>"]:::synthStyle
     
-    E["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>📊 Streamlit UI</b></td></tr><tr><td style='border-top: 1px solid #8E24AA; padding-top: 8px; text-align: left;'>• 3-Tab 대시보드 출력<br/>• 세션 히스토리 복원</td></tr></table>"]:::uiStyle
+    E["<table style='min-width: 250px; border-collapse: collapse; margin: 0 auto;'><tr><td align='center' style='padding-bottom: 6px;'><b>📊 Streamlit UI</b></td></tr><tr><td style='border-top: 1px solid #8E24AA; padding-top: 8px; text-align: center;'><div style='display: inline-block; text-align: left;'>• 3-Tab 대시보드 출력<br/>• 세션 히스토리 복원</div></td></tr></table>"]:::uiStyle
 
     %% 정방향 파이프라인 흐름
     A --> B
