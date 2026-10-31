@@ -355,7 +355,19 @@ def create_docuscout_graph():
             search_depth="advanced",
             topic="general",
             max_results=20,
-            exclude_domains=["dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki"]
+            exclude_domains=[
+                "dcinside.com", 
+                "fmkorea.com", 
+                "ruliweb.com", 
+                "blog.naver.com", 
+                "namu.wiki",
+                "ppomppu.co.kr",     
+                "theqoo.net",        
+                "instiz.net",        
+                "kin.naver.com",     
+                "twitter.com",       
+                "x.com"              
+            ]
         )
         raw_sources = search_response.get('results', [])
         st.session_state.raw_fetched_count = len(raw_sources) if raw_sources else 20
