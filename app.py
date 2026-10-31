@@ -356,20 +356,28 @@ def create_docuscout_graph():
             topic="general",
             max_results=20,
             exclude_domains=[
-                "dcinside.com", 
-                "fmkorea.com", 
-                "ruliweb.com", 
-                "blog.naver.com", 
-                "namu.wiki",
-                "ppomppu.co.kr",     
-                "theqoo.net",        
-                "instiz.net",        
-                "kin.naver.com",     
-                "twitter.com",       
-                "x.com"              
+                "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki",
+                "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
+                "facebook.com", "instagram.com", "twitter.com", "x.com"
             ]
         )
         raw_sources = search_response.get('results', [])
+        
+        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터
+        blocked_keywords = [
+            "facebook.com", "instagram.com", "blog.naver.com", 
+            "naver.com/blog", "twitter.com", "x.com", 
+            "dcinside.com", "fmkorea.com", "ruliweb.com", "namu.wiki",
+            "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com"
+        ]
+        
+        cleaned_sources = []
+        for src in raw_sources:
+            url = src.get('url', '').lower()
+            if not any(bk in url for bk in blocked_keywords):
+                cleaned_sources.append(src)
+                
+        raw_sources = cleaned_sources
         st.session_state.raw_fetched_count = len(raw_sources) if raw_sources else 20
         return {"raw_sources": raw_sources}
 
@@ -719,7 +727,6 @@ if st.session_state.report_data:
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
                 with st.spinner("📡 현재 시점 최신 자료를 누적 수집하는 중..."):
-                    # 💡 st.session_state.current_user_query를 직접 참조하도록 수정 완료
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
                     st.rerun()
 
