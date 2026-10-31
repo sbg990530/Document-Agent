@@ -26,29 +26,25 @@ graph LR
 
     A([👤 사용자 질의]):::userStyle 
     
-    B["🧠 Planner Node
-    ──────────────────
-    • 질의 의도 및 시점 분석
-    • 공인 데이터 라우팅
-    &nbsp;"]:::plannerStyle
+    B["&nbsp;&nbsp;&nbsp;&nbsp;🧠 Planner Node&nbsp;&nbsp;&nbsp;&nbsp;
+    ────────────────────────
+    &nbsp;• 질의 의도 및 시점 분석&nbsp;
+    &nbsp;• 공인 데이터 라우팅&nbsp;"]:::plannerStyle
     
-    C["🛡️ Search & Filter
-    ──────────────────
-    • Tavily 웹 검색 수행
-    • 가비지/유튜브 필터링
-    &nbsp;"]:::filterStyle
+    C["&nbsp;&nbsp;&nbsp;&nbsp;🛡️ Search & Filter&nbsp;&nbsp;&nbsp;&nbsp;
+    ────────────────────────
+    &nbsp;• Tavily 웹 검색 수행&nbsp;
+    &nbsp;• 가비지/유튜브 필터링&nbsp;"]:::filterStyle
     
-    D["📅 Synthesizer Node
-    ──────────────────
-    • 최신순 데이터 정렬
-    • 근거 리포트 합성
-    &nbsp;"]:::synthStyle
+    D["&nbsp;&nbsp;&nbsp;&nbsp;📅 Synthesizer Node&nbsp;&nbsp;&nbsp;&nbsp;
+    ────────────────────────
+    &nbsp;• 최신순 데이터 정렬&nbsp;
+    &nbsp;• 근거 리포트 합성&nbsp;"]:::synthStyle
     
-    E["📊 Streamlit UI
-    ──────────────────
-    • 3-Tab 대시보드 출력
-    • 세션 히스토리 복원
-    &nbsp;"]:::uiStyle
+    E["&nbsp;&nbsp;&nbsp;&nbsp;📊 Streamlit UI&nbsp;&nbsp;&nbsp;&nbsp;
+    ────────────────────────
+    &nbsp;• 3-Tab 대시보드 출력&nbsp;
+    &nbsp;• 세션 히스토리 복원&nbsp;"]:::uiStyle
 
     %% 정방향 파이프라인 흐름
     A --> B
