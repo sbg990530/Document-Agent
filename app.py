@@ -358,17 +358,19 @@ def create_docuscout_graph():
             exclude_domains=[
                 "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki",
                 "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
-                "facebook.com", "instagram.com", "twitter.com", "x.com"
+                "facebook.com", "instagram.com", "twitter.com", "x.com",
+                "youtube.com", "youtu.be"
             ]
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터 (모바일 서브도메인 포함)
+        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터 (유튜브 및 모바일 서브도메인 포함)
         blocked_keywords = [
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
             "dcinside.com", "fmkorea.com", "ruliweb.com", "namu.wiki",
-            "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com"
+            "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
+            "youtube.com", "youtu.be"
         ]
         
         cleaned_sources = []
