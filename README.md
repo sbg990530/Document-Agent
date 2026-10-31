@@ -26,25 +26,13 @@ graph LR
 
     A([👤 사용자 질의]):::userStyle 
     
-    B["🧠 Planner Node
-    ━━━━━━━━━━━━━━━
-    · 질의 의도 및 시점 분석
-    · 공인 데이터 라우팅"]:::plannerStyle
+    B["<div style='text-align: left;'><b>🧠 Planner Node</b><br/>━━━━━━━━━━━━━━━<br/>• 질의 의도 및 시점 분석<br/>• 공인 데이터 라우팅</div>"]:::plannerStyle
     
-    C["🛡️ Search & Filter
-    ━━━━━━━━━━━━━━━
-    · Tavily 웹 검색 수행
-    · 가비지/유튜브 필터링"]:::filterStyle
+    C["<div style='text-align: left;'><b>🛡️ Search & Filter</b><br/>━━━━━━━━━━━━━━━<br/>• Tavily 웹 검색 수행<br/>• 가비지/유튜브 필터링</div>"]:::filterStyle
     
-    D["📅 Synthesizer Node
-    ━━━━━━━━━━━━━━━
-    · 최신순 데이터 정렬
-    · 근거 리포트 합성"]:::synthStyle
+    D["<div style='text-align: left;'><b>📅 Synthesizer Node</b><br/>━━━━━━━━━━━━━━━<br/>• 최신순 데이터 정렬<br/>• 근거 리포트 합성</div>"]:::synthStyle
     
-    E["📊 Streamlit UI
-    ━━━━━━━━━━━━━━━
-    · 3-Tab 대시보드 출력
-    · 세션 히스토리 복원"]:::uiStyle
+    E["<div style='text-align: left;'><b>📊 Streamlit UI</b><br/>━━━━━━━━━━━━━━━<br/>• 3-Tab 대시보드 출력<br/>• 세션 히스토리 복원</div>"]:::uiStyle
 
     %% 정방향 파이프라인 흐름
     A --> B
@@ -52,7 +40,7 @@ graph LR
     C --> D
     D --> E
     
-    %% LangGraph 피드백 루프 (아래쪽으로 우회)
+    %% LangGraph 피드백 루프
     D -- "🔄 정보 부족 / 추가 탐색 (Loop)" --> B
 ```
 * **범용 공인 데이터 API 다중 라우팅(`Planner Node`) :** 사용자의 질의 의도 및 시점 분석, 정형 통계 데이터 기반 리포트 신뢰도 수치 상승효과
