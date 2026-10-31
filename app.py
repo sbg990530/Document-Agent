@@ -256,7 +256,7 @@ def extract_date_score(text: str) -> int:
         return year * 10000 + month * 100 + day
     return 0
 
-# 🛡️ [필수 가드] 유튜브 및 인코딩 깨짐/가비지 데이터 필터링 함수
+# 🛡️ 가비지 판별 함수
 def is_json_garbage(text: str) -> bool:
     if not text or len(text.strip()) < 10:
         return True
@@ -333,7 +333,6 @@ def create_docuscout_graph():
     def search_node(state: AgentState):
         clean_keyword = state["search_keyword"]
         
-        # 🛡️ Tavily 검색 시 유튜브, 커뮤니티, 소셜 도메인 원천 차단
         search_response = tavily_client.search(
             query=clean_keyword,
             search_depth="advanced",
@@ -348,7 +347,6 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ 파이썬 블랙리스트 2차 차단
         blocked_keywords = [
             "youtube.com", "youtu.be", "facebook.com", "instagram.com", 
             "blog.naver.com", "twitter.com", "x.com", "dcinside.com", 
@@ -369,7 +367,6 @@ def create_docuscout_graph():
             title = src.get('title', '')
             content = src.get('content', '')
             
-            # 🛡️ [핵심 가드] Untitled, 깨진 인코딩, JSON 찌꺼기 원천 차단
             if is_json_garbage(title) or is_json_garbage(content) or not title or title.lower() == "untitled":
                 garbage_count += 1
                 continue
@@ -665,6 +662,34 @@ if st.session_state.report_data:
         m3.metric("검증된 출처 수", f"{len(st.session_state.sources_data)}개", "최신순 정렬됨")
 
         st.markdown("---")
+
+        col_audit_1, col_audit_2 = st.columns(2)
+
+        with col_audit_1:
+            st.markdown("#### 🧹 범용 하이브리드 필터링 리포트")
+            with st.container(border=True):
+                st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
+                st.markdown(f"**차단된 편향/스팸/노이즈 문서:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
+                st.info("💡 유튜브, 커뮤니티 및 인코딩 깨진 가비지 문서를 원천 차단하고 최신순으로 정돈된 팩트만 제공합니다.")
+
+        with col_audit_2:
+            st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
+            with st.container(border=True):
+                st.markdown("**Tier 1 (범용 공인 정형 데이터 / 공식 통계 레지스트리)**")
+                st.progress(academic_ratio / 100)
+                st.caption(f"비중: {academic_ratio}% (절대적 팩트 원천)")
+
+                st.markdown("**Tier 2 (국내외 IT, 경제, 전문 언론사 기사)**")
+                st.progress(news_ratio / 100)
+                st.caption(f"비중: {news_ratio}% (배경 맥락 보완)")
+
+                st.markdown("**Tier 3 (일반 웹 아티클 및 유튜브/커뮤니티)**")
+                st.progress(0.0)
+                st.caption("비중: 0% (배제됨)")
+
+        st.markdown("---")
+        st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
             st.markdown("✅ **클린 파이프라인 유지:** 꼬임 없는 가벼운 구조로 빠르고 안정적인 리서치를 제공합니다.")
             st.markdown("✅ **유튜브 및 노이즈 원천 차단:** 동영상, 커뮤니티 및 깨진 인코딩 가비지 문서를 철저히 배제합니다.")
