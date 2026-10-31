@@ -256,12 +256,16 @@ def extract_date_score(text: str) -> int:
         return year * 10000 + month * 100 + day
     return 0
 
-# 🛡️ [핵심 보완] JSON 및 유니코드 가비지 데이터 판별 함수
+# 🛡️ [핵심 보완] JSON, 유니코드 및 인코딩 깨짐(퍼센트/유니코드 스트링) 가비지 판별 함수
 def is_json_garbage(text: str) -> bool:
     if not text or len(text.strip()) < 10:
         return True
-    # JSON 키 패턴이나 과도한 유니코드 이스케이프(\ubca0 등) 포함 여부 확인
-    if '"errcode":' in text or '{"' in text or text.count('\\u') > 5:
+    # JSON 패턴, 과도한 유니코드 이스케이프(\ubca0 등), 퍼센트 인코딩 깨짐(%uc548 등) 검출
+    if '"errcode":' in text or '{"' in text:
+        return True
+    if text.count('\\u') > 3 or text.count('%u') > 3 or text.count('%uc') > 2:
+        return True
+    if "Page " in text and "Demo" in text:
         return True
     return False
 
@@ -356,7 +360,7 @@ def create_docuscout_graph():
 
     def filter_node(state: AgentState):
         raw_sources = state["raw_sources"]
-        add_timeline_log("🧠 데이터 정제 및 가비지 필터링", "API JSON 찌꺼기 및 무효 문서 제거 중...")
+        add_timeline_log("🧠 데이터 정제 및 인코딩 가비지 필터링", "깨진 인코딩 문자열 및 무효 문서 제거 중...")
         
         processed_sources = []
         garbage_count = 0
@@ -364,7 +368,7 @@ def create_docuscout_graph():
             title = src.get('title', '')
             content = src.get('content', '')
             
-            # 🛡️ [핵심] 제목이나 내용이 API JSON/유니코드 가비지 형태면 무조건 배제
+            # 🛡️ [핵심] 인코딩이 깨졌거나 PDF 뷰어 찌꺼기인 경우 원천 차단
             if is_json_garbage(title) or is_json_garbage(content) or not title or title.lower() == "untitled":
                 garbage_count += 1
                 continue
@@ -628,7 +632,7 @@ if st.session_state.report_data:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 가비지 데이터를 거르고 최신 자료를 수집하는 중..."):
+                with st.spinner("📡 깨진 인코딩 문서를 거르고 최신 자료를 수집하는 중..."):
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
                     st.success("✨ 최신순 정렬 및 갱신 완료!")
                     time.sleep(0.5)
@@ -661,5 +665,5 @@ if st.session_state.report_data:
 
         st.markdown("---")
         with st.container(border=True):
-            st.markdown("✅ **JSON 및 유니코드 가비지 차단:** API 응답 원문 형태의 쓰레기 데이터는 수집 단계에서 완벽히 배제됩니다.")
+            st.markdown("✅ **인코딩 깨짐 및 PDF 뷰어 찌꺼기 차단:** `%uc`, `%u` 등 퍼센트/유니코드가 오염된 텍스트 및 Demo 문서는 수집 단계에서 즉시 배제됩니다.")
             st.markdown("✅ **유튜브 및 노이즈 원천 차단:** 동영상 및 커뮤니티 스팸 링크를 철저히 배제합니다.")
