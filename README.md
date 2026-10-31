@@ -26,13 +26,25 @@ graph LR
 
     A([👤 사용자 질의]):::userStyle 
     
-    B["<div style='text-align: center;'><div style='display: inline-block; text-align: left;'><b>🧠 Planner Node</b><br/>━━━━━━━━━━━━━━━<br/>• 질의 의도 및 시점 분석<br/>• 공인 데이터 라우팅</div></div>"]:::plannerStyle
+    B["🧠 Planner Node
+    ━━━━━━━━━━━━
+    질의 의도 및 시점 분석
+    공인 데이터 라우팅"]:::plannerStyle
     
-    C["<div style='text-align: center;'><div style='display: inline-block; text-align: left;'><b>🛡️ Search & Filter</b><br/>━━━━━━━━━━━━━━━<br/>• Tavily 웹 검색 수행<br/>• 가비지/유튜브 필터링</div></div>"]:::filterStyle
+    C["🛡️ Search & Filter
+    ━━━━━━━━━━━━
+    Tavily 웹 검색 수행
+    가비지/유튜브 필터링"]:::filterStyle
     
-    D["<div style='text-align: center;'><div style='display: inline-block; text-align: left;'><b>📅 Synthesizer Node</b><br/>━━━━━━━━━━━━━━━<br/>• 최신순 데이터 정렬<br/>• 근거 리포트 합성</div></div>"]:::synthStyle
+    D["📅 Synthesizer Node
+    ━━━━━━━━━━━━
+    최신순 데이터 정렬
+    근거 리포트 합성"]:::synthStyle
     
-    E["<div style='text-align: center;'><div style='display: inline-block; text-align: left;'><b>📊 Streamlit UI</b><br/>━━━━━━━━━━━━━━━<br/>• 3-Tab 대시보드 출력<br/>• 세션 히스토리 복원</div></div>"]:::uiStyle
+    E["📊 Streamlit UI
+    ━━━━━━━━━━━━
+    3-Tab 대시보드 출력
+    세션 히스토리 복원"]:::uiStyle
 
     %% 정방향 파이프라인 흐름
     A --> B
