@@ -258,7 +258,7 @@ if "search_history" not in st.session_state:
     st.session_state.search_history = []
 
 # =====================================================================
-# ⚙️ LangGraph 에이전트 자가 수정(Self-Correction) 파이프라인 구조
+# ⚙️ LangGraph 에이전트 파이프라인 구조
 # =====================================================================
 def add_timeline_log(step_title, step_desc):
     now_str = datetime.now(KST).strftime("%H:%M:%S")
@@ -363,7 +363,7 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터
+        # 🛡️ 파이썬 레벨 URL 블랙리스트 강제 차단 필터 (모바일 서브도메인 포함)
         blocked_keywords = [
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
@@ -528,6 +528,7 @@ def create_docuscout_graph():
 
 def run_docuscout_pipeline(query_text, is_live_refresh=False):
     if is_live_refresh:
+        # 라이브 갱신 시 타임라인만 초기화하고 기존 소스에 최신 소스를 누적 반영
         st.session_state.timeline_logs = []
     else:
         st.session_state.timeline_logs = []
@@ -726,8 +727,11 @@ if st.session_state.report_data:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 현재 시점 최신 자료를 누적 수집하는 중..."):
+                with st.spinner("📡 현재 시점 최신 자료를 누적 수집하고 리포트를 재작성하는 중..."):
+                    # 💡 라이브 갱신 시 파이프라인 전체를 다시 태워 리포트와 소스를 동시 갱신
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
+                    st.success("✨ 최신 데이터 수집 및 리포트 재작성이 완료되었습니다!")
+                    time.sleep(0.8)
                     st.rerun()
 
         if st.session_state.timeline_logs:
