@@ -246,14 +246,24 @@ if "current_user_query" not in st.session_state:
 if "search_history" not in st.session_state:
     st.session_state.search_history = []
 
-# ⏱️ 문서 내 날짜 파싱 헬퍼 함수
-def extract_date_score(text: str) -> int:
-    match = re.search(r'(\d{4})[\.\-년\s]+(\d{1,2})[\.\-월\s]*(\d{1,2})?', text)
-    if match:
-        year = int(match.group(1))
-        month = int(match.group(2))
-        day = int(match.group(3)) if match.group(3) else 1
+# ⏱️ 스마트 날짜 파싱 헬퍼 함수
+def extract_date_score(text: str, target_period: str) -> int:
+    year_match = re.search(r'(20\d{2}|19\d{2})', target_period)
+    default_year = int(year_match.group(1)) if year_match else 2026
+
+    match_full = re.search(r'(\d{4})[\.\-년\s]+(\d{1,2})[\.\-월\s]*(\d{1,2})?', text)
+    if match_full:
+        year = int(match_full.group(1))
+        month = int(match_full.group(2))
+        day = int(match_full.group(3)) if match_full.group(3) else 1
         return year * 10000 + month * 100 + day
+
+    match_md = re.search(r'(?:(\d{1,2})월)?\s*(\d{1,2})일', text)
+    if match_md:
+        month = int(match_md.group(1)) if match_md.group(1) else 1
+        day = int(match_md.group(2))
+        return default_year * 10000 + month * 100 + day
+
     return 0
 
 # =====================================================================
@@ -349,14 +359,13 @@ def create_docuscout_graph():
     def search_node(state: AgentState):
         clean_keyword = state["search_keyword"]
         
-        # 🛡️ Tavily 검색 시 유튜브 및 비즈니스/소셜 노이즈 도메인 원천 차단
         search_response = tavily_client.search(
             query=clean_keyword,
             search_depth="advanced",
             topic="general",
             max_results=20,
             exclude_domains=[
-                "youtube.com", "youtu.be",  # 👈 유튜브 검색 결과 배제
+                "youtube.com", "youtu.be",
                 "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki",
                 "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
                 "facebook.com", "instagram.com", "twitter.com", "x.com"
@@ -364,9 +373,8 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ 파이썬 레벨 URL 블랙리스트 2차 강제 차단 (모바일 서브도메인 포함)
         blocked_keywords = [
-            "youtube.com", "youtu.be",  # 👈 유튜브 링크 철저 차단
+            "youtube.com", "youtu.be",
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
             "dcinside.com", "fmkorea.com", "ruliweb.com", "namu.wiki",
@@ -386,8 +394,14 @@ def create_docuscout_graph():
     def filter_node(state: AgentState):
         query_text = state["query"]
         raw_sources = state["raw_sources"]
+        target_period = state["target_period"]
         
-        add_timeline_log("🧠 최신성(Recency) 검증 및 연관성 필터링", "질문 주제와 연관된 유효 문서 필터링 중...")
+        # 🛡️ [핵심 엄격 가드] 질문의 타겟 연도 추출 후, 해당 연도 이전 기사 원천 차단 (예: 2026년 질문이면 2026년 1월 1일 이전 기사 차단)
+        year_match = re.search(r'(20\d{2}|19\d{2})', target_period)
+        target_year = int(year_match.group(1)) if year_match else 2026
+        min_allowed_score = target_year * 10000 + 101  # 예: 20260101
+        
+        add_timeline_log("🧠 최신성(Recency) 엄격 검증", f"{target_year}년 이전의 과거 기사 및 노이즈 원천 차단 중...")
         
         base_noise = ["카지노", "베팅", "토토", "1~14주차", "단순 뜻", "사전적 정의"]
 
@@ -398,6 +412,12 @@ def create_docuscout_graph():
             combined = title_text + " " + content_text
 
             if any(bn in combined for bn in base_noise):
+                continue
+
+            doc_date_score = extract_date_score(combined, target_period)
+            
+            # 만약 날짜가 감지되었는데 타겟 연도보다 과거라면 무조건 제외!
+            if doc_date_score > 0 and doc_date_score < min_allowed_score:
                 continue
 
             eval_prompt = ChatPromptTemplate.from_messages([
@@ -425,7 +445,7 @@ def create_docuscout_graph():
         query_text = state["query"]
         official_api_data = state["official_api_data"]
         filtered_sources = state["filtered_sources"]
-        new_collected = filtered_sources[:6] if filtered_sources else state["raw_sources"][:6]
+        new_collected = filtered_sources[:8] if filtered_sources else state["raw_sources"][:8]
 
         if new_collected:
             add_timeline_log("🔄 한국어 요약 및 최신 팩트 정제", "수집된 스니펫을 정제 및 날짜 점수 추출 중...")
@@ -445,8 +465,7 @@ def create_docuscout_graph():
                 kr_title = title_match.group(1).strip() if title_match else result['title']
                 kr_content = content_match.group(1).strip() if content_match else result['content']
 
-                # 문서 내 날짜 점수 추출 (정렬용)
-                date_score = extract_date_score(kr_title + " " + kr_content)
+                date_score = extract_date_score(kr_title + " " + kr_content, target_period)
 
                 item = {
                     "title": kr_title, 
@@ -455,11 +474,10 @@ def create_docuscout_graph():
                     "date_score": date_score
                 }
                 
-                # 중복 방지 추가
                 if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
                     st.session_state.sources_data.append(item)
 
-        # 🛡️ [핵심 고도화] 전체 수집된 소스들을 'date_score' 기준 내림차순(최신순)으로 완벽하게 정렬!
+        # 🛡️ [핵심 정렬] 전체 소스들을 'date_score' 기준 내림차순(최신순)으로 완벽하게 정렬!
         st.session_state.sources_data.sort(key=lambda x: x.get('date_score', 0), reverse=True)
 
         add_timeline_log("🤖 하이브리드 리포트 작성", "최신순으로 정렬된 팩트를 바탕으로 리포트 재작성 중...")
@@ -541,8 +559,10 @@ def create_docuscout_graph():
     return workflow.compile()
 
 def run_docuscout_pipeline(query_text, is_live_refresh=False):
+    # 🛡️ [핵심 수정] 라이브 갱신 시 기존 소스 목록을 초기화하여 과거 데이터가 잔류하지 않도록 방지
     if is_live_refresh:
         st.session_state.timeline_logs = []
+        st.session_state.sources_data = []
     else:
         st.session_state.timeline_logs = []
         st.session_state.sources_data = []
@@ -739,7 +759,7 @@ if st.session_state.report_data:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 최신 자료를 수집하고 날짜순으로 재정렬하는 중..."):
+                with st.spinner("📡 기존 소스를 비우고 최신 자료만 수집하여 날짜순으로 재정렬하는 중..."):
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
                     st.success("✨ 최신순 정렬 및 리포트 갱신이 완료되었습니다!")
                     time.sleep(0.8)
@@ -778,9 +798,9 @@ if st.session_state.report_data:
             st.markdown("#### 🧹 범용 하이브리드 필터링 리포트")
             with st.container(border=True):
                 st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
-                st.markdown(f"**차단된 편향/스팸/유튜브/노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**차단된 편향/스팸/유튜브/과거 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
                 st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
-                st.info("💡 유튜브 및 동영상 매체를 원천 배제하고, 공식 웹 문서와 뉴스 팩트만을 최신순으로 엄선합니다.")
+                st.info("💡 갱신 시 기존 소스를 초기화하고, 타겟 연도(2026년) 하한선 기준을 만족하는 최신 팩트만 엄선하여 정렬합니다.")
 
         with col_audit_2:
             st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
@@ -800,6 +820,6 @@ if st.session_state.report_data:
         st.markdown("---")
         st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
-            st.markdown("✅ **유튜브 및 소셜 미디어 원천 차단:** 동영상 및 익명 커뮤니티 링크는 검색 및 수집 단계에서 완전히 배제됩니다.")
-            st.markdown("✅ **타임스탬프 기반 최신순 정렬 (Recency Sorting):** 추출된 날짜 스코어 기준으로 정렬하여 최신 기사가 상단에 고정됩니다.")
-            st.markdown("✅ **원문 검증 미리보기 모달 지원:** 근거 자료 카드마다 미리보기 모달을 제공하여 사용자가 직접 원문을 확인할 수 있습니다.")
+            st.markdown("✅ **갱신 시 세션 리셋:** 갱신 버튼 클릭 시 이전 데이터의 잔류 없이 완전히 새로운 최신 데이터 세트로 교체됩니다.")
+            st.markdown("✅ **타겟 연도 하한선 강제 가드:** 2026년 이전의 과거 기사는 수집 단계에서 즉시 차단됩니다.")
+            st.markdown("✅ **엄격한 내림차순 정렬:** 검증된 모든 소스는 최신순으로 정렬되어 가장 최신 기사가 #1 상단에 고정됩니다.")
