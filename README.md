@@ -26,13 +26,29 @@ graph LR
 
     A([👤 사용자 질의]):::userStyle 
     
-    B["<table style='min-width: 230px; border-collapse: collapse;'><tr><td align='center'><b>🧠 Planner Node</b></td></tr><tr><td style='border-top: 1px solid #00ACC1; padding-top: 6px; text-align: left;'>• 질의 의도 및 시점 분석<br/>• 공인 데이터 라우팅</td></tr></table>"]:::plannerStyle
+    B["🧠 Planner Node
+    ──────────────────
+    • 질의 의도 및 시점 분석
+    • 공인 데이터 라우팅
+    &nbsp;"]:::plannerStyle
     
-    C["<table style='min-width: 230px; border-collapse: collapse;'><tr><td align='center'><b>🛡️ Search & Filter</b></td></tr><tr><td style='border-top: 1px solid #43A047; padding-top: 6px; text-align: left;'>• Tavily 웹 검색 수행<br/>• 가비지/유튜브 필터링</td></tr></table>"]:::filterStyle
+    C["🛡️ Search & Filter
+    ──────────────────
+    • Tavily 웹 검색 수행
+    • 가비지/유튜브 필터링
+    &nbsp;"]:::filterStyle
     
-    D["<table style='min-width: 230px; border-collapse: collapse;'><tr><td align='center'><b>📅 Synthesizer Node</b></td></tr><tr><td style='border-top: 1px solid #FB8C00; padding-top: 6px; text-align: left;'>• 최신순 데이터 정렬<br/>• 근거 리포트 합성</td></tr></table>"]:::synthStyle
+    D["📅 Synthesizer Node
+    ──────────────────
+    • 최신순 데이터 정렬
+    • 근거 리포트 합성
+    &nbsp;"]:::synthStyle
     
-    E["<table style='min-width: 230px; border-collapse: collapse;'><tr><td align='center'><b>📊 Streamlit UI</b></td></tr><tr><td style='border-top: 1px solid #8E24AA; padding-top: 6px; text-align: left;'>• 3-Tab 대시보드 출력<br/>• 세션 히스토리 복원</td></tr></table>"]:::uiStyle
+    E["📊 Streamlit UI
+    ──────────────────
+    • 3-Tab 대시보드 출력
+    • 세션 히스토리 복원
+    &nbsp;"]:::uiStyle
 
     %% 정방향 파이프라인 흐름
     A --> B
