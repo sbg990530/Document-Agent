@@ -22,6 +22,7 @@ graph TD
     B --> C[Search & Filter Node: 웹 검색 및 보안/가비지 필터링]
     C --> D[Synthesizer Node: 최신순 정렬 및 리포트 합성]
     D --> E[Streamlit 대시보드 및 3-Tab UI 출력]
+```
 * **범용 공인 데이터 API 다중 라우팅(`Planner Node`) :** 사용자의 질의 의도 및 시점 분석, 정형 통계 데이터 기반 리포트 신뢰도 수치 상승효과
 * **철저한 보안 및 노이즈 차단 아키텍처(`Search & Filter Node`) :** 유튜브 및 커뮤니티 도메인 배제, 가비지 데이터 필터링, 개인정보 보호
 * **시점 감지 기반 데이터 수집(`Synthesizer Node`)**
