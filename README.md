@@ -24,38 +24,41 @@ graph LR
     classDef synthStyle fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#000;
     classDef uiStyle fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px,color:#000;
 
-    subgraph DocuScout Workflow
+    subgraph DocuScout ["DocuScout AI Agent Architecture"]
         direction LR
+        
         A([👤 사용자 질의]):::userStyle 
         
         B["🧠 Planner Node
         ━━━━━━━━━━━━━━━
-        · 질의 의도 분석
+        · 질의 의도 및 시점 분석
         · 공인 데이터 라우팅"]:::plannerStyle
         
         C["🛡️ Search & Filter
         ━━━━━━━━━━━━━━━
-        · 웹 검색 수행
-        · 보안 및 가비지 필터"]:::filterStyle
+        · Tavily 웹 검색 수행
+        · 가비지/유튜브 필터링"]:::filterStyle
         
         D["📅 Synthesizer Node
         ━━━━━━━━━━━━━━━
-        · 최신순 정렬
-        · 리포트 합성"]:::synthStyle
+        · 최신순 데이터 정렬
+        · 근거 리포트 합성"]:::synthStyle
         
         E["📊 Streamlit UI
         ━━━━━━━━━━━━━━━
-        · 3-Tab 대시보드
-        · 결과 출력"]:::uiStyle
-    end
+        · 3-Tab 대시보드 출력
+        · 세션 히스토리 복원"]:::uiStyle
 
-    A --> B
-    B --> C
-    C --> D
-    
-    %% 루프 및 분기 구조
-    D -- "정보 부족 / 추가 탐색" --> B
-    D -- "검증 완료" --> E
+        A --> B
+        B --> C
+        C --> D
+        
+        %% 정방향 검증 완료 흐름
+        D -- "검증 완료" --> E
+        
+        %% 피드백 루프 (아래쪽으로 정돈된 흐름)
+        D -. "🔄 정보 부족 / 추가 탐색 (Loop)" .- B
+    end
 ```
 * **범용 공인 데이터 API 다중 라우팅(`Planner Node`) :** 사용자의 질의 의도 및 시점 분석, 정형 통계 데이터 기반 리포트 신뢰도 수치 상승효과
 * **철저한 보안 및 노이즈 차단 아키텍처(`Search & Filter Node`) :** 유튜브 및 커뮤니티 도메인 배제, 가비지 데이터 필터링, 개인정보 보호
