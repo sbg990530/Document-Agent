@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 🎨 커스텀 CSS (사이드바 히스토리 UI 초슬림 세련되게 개선)
+# 🎨 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -245,12 +245,9 @@ if "current_user_query" not in st.session_state:
     st.session_state.current_user_query = ""
 if "search_history" not in st.session_state:
     st.session_state.search_history = []
-if "latest_timestamp_score" not in st.session_state:
-    st.session_state.latest_timestamp_score = 0  # 시점 비교용 점수 저장
 
 # ⏱️ 문서 내 날짜 파싱 헬퍼 함수
 def extract_date_score(text: str) -> int:
-    """텍스트 내 날짜(YYYY-MM-DD 또는 YYYY년 MM월)를 감지하여 비교 가능한 점수로 환산"""
     match = re.search(r'(\d{4})[\.\-년\s]+(\d{1,2})[\.\-월\s]*(\d{1,2})?', text)
     if match:
         year = int(match.group(1))
@@ -365,7 +362,6 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
-        # 🛡️ URL 블랙리스트 필터링
         blocked_keywords = [
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
@@ -386,15 +382,12 @@ def create_docuscout_graph():
     def filter_node(state: AgentState):
         query_text = state["query"]
         raw_sources = state["raw_sources"]
-        is_live = state.get("is_live_refresh", False)
         
-        add_timeline_log("🧠 최신성(Recency) 검증 및 연관성 필터링", "기존 데이터 시점보다 과거인 자료는 차단하고 최신 팩트만 선별 중...")
+        add_timeline_log("🧠 최신성(Recency) 검증 및 연관성 필터링", "질문 주제와 연관된 유효 문서 필터링 중...")
         
         base_noise = ["카지노", "베팅", "토토", "1~14주차", "단순 뜻", "사전적 정의"]
 
         filtered_sources = []
-        max_new_score = st.session_state.latest_timestamp_score
-
         for src in raw_sources:
             title_text = src['title'].lower()
             content_text = src['content'].lower()
@@ -402,17 +395,6 @@ def create_docuscout_graph():
 
             if any(bn in combined for bn in base_noise):
                 continue
-
-            # 🛡️ [핵심] 시점 파싱 및 과거 시점 차단 (Recency Guard)
-            doc_date_score = extract_date_score(combined)
-            
-            # 라이브 갱신 시 기존 수집 자료 시점보다 오래된 자료는 차단
-            if is_live and doc_date_score > 0 and st.session_state.latest_timestamp_score > 0:
-                if doc_date_score < st.session_state.latest_timestamp_score:
-                    continue # 기존 최신 시점보다 이전 자료면 거름
-
-            if doc_date_score > max_new_score:
-                max_new_score = doc_date_score
 
             eval_prompt = ChatPromptTemplate.from_messages([
                 ("system", "수집된 뉴스가 질문 주제와 연관이 있다면 'YES', 전혀 다른 주제라면 'NO'만 답변하세요."),
@@ -431,8 +413,6 @@ def create_docuscout_graph():
             except Exception:
                 filtered_sources.append(src)
 
-        # 최신 시점 스코어 갱신
-        st.session_state.latest_timestamp_score = max_new_score
         st.session_state.noise_filtered_count = max(0, len(raw_sources) - len(filtered_sources))
         return {"filtered_sources": filtered_sources}
 
@@ -444,7 +424,7 @@ def create_docuscout_graph():
         new_collected = filtered_sources[:6] if filtered_sources else state["raw_sources"][:6]
 
         if new_collected:
-            add_timeline_log("🔄 한국어 요약 및 최신 팩트 정제", "수집된 최신 스니펫을 근거 자료용으로 정제 중...")
+            add_timeline_log("🔄 한국어 요약 및 최신 팩트 정제", "수집된 스니펫을 정제 및 날짜 점수 추출 중...")
             for result in new_collected:
                 translate_prompt = ChatPromptTemplate.from_messages([
                     ("system", "뉴스 기사를 분석하여 한국어로 요약하세요.\n제목: [한국어 제목]\n내용: [한국어 요약 2~3문장]"),
@@ -461,13 +441,24 @@ def create_docuscout_graph():
                 kr_title = title_match.group(1).strip() if title_match else result['title']
                 kr_content = content_match.group(1).strip() if content_match else result['content']
 
-                item = {"title": kr_title, "content": kr_content, "url": result['url']}
-                
-                # 중복 및 과거 소스 방지하며 최신 소스를 상단에 삽입
-                if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
-                    st.session_state.sources_data.insert(0, item)
+                # 문서 내 날짜 점수 추출 (정렬용)
+                date_score = extract_date_score(kr_title + " " + kr_content)
 
-        add_timeline_log("🤖 하이브리드 리포트 작성", "최신 정제 팩트를 반영하여 리포트 재작성 중...")
+                item = {
+                    "title": kr_title, 
+                    "content": kr_content, 
+                    "url": result['url'],
+                    "date_score": date_score
+                }
+                
+                # 중복 방지 추가
+                if not any(existing['url'] == item['url'] for existing in st.session_state.sources_data):
+                    st.session_state.sources_data.append(item)
+
+        # 🛡️ [핵심 고도화] 전체 수집된 소스들을 'date_score' 기준 내림차순(최신순)으로 완벽하게 정렬!
+        st.session_state.sources_data.sort(key=lambda x: x.get('date_score', 0), reverse=True)
+
+        add_timeline_log("🤖 하이브리드 리포트 작성", "최신순으로 정렬된 팩트를 바탕으로 리포트 재작성 중...")
         
         news_context = ""
         for idx, result in enumerate(st.session_state.sources_data[:6], 1):
@@ -551,7 +542,6 @@ def run_docuscout_pipeline(query_text, is_live_refresh=False):
     else:
         st.session_state.timeline_logs = []
         st.session_state.sources_data = []
-        st.session_state.latest_timestamp_score = 0
 
     year_match = re.search(r'(20\d{2}년|19\d{2}년|\b20\d{2}\b|\b19\d{2}\b)', query_text)
     target_period = year_match.group(0) if year_match else datetime.now(KST).strftime("%Y년 %m월")
@@ -593,7 +583,6 @@ with st.sidebar:
         st.session_state.followup_data = None
         st.session_state.current_user_query = ""
         st.session_state.timeline_logs = []
-        st.session_state.latest_timestamp_score = 0
         st.rerun()
 
     st.markdown("---")
@@ -746,9 +735,9 @@ if st.session_state.report_data:
             st.info(f"파싱된 자동 검색 키워드: **`{st.session_state.auto_keyword}`**")
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
-                with st.spinner("📡 과거 소스는 배제하고 최신 자료만 추려 리포트를 재작성 중..."):
+                with st.spinner("📡 최신 자료를 수집하고 날짜순으로 재정렬하는 중..."):
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
-                    st.success("✨ 최신 데이터 검증 및 리포트 재작성이 완료되었습니다!")
+                    st.success("✨ 최신순 정렬 및 리포트 갱신이 완료되었습니다!")
                     time.sleep(0.8)
                     st.rerun()
 
@@ -775,7 +764,7 @@ if st.session_state.report_data:
         m1, m2, m3 = st.columns(3)
         m1.metric("평균 신뢰도 점수", f"{dynamic_avg_score}.2%", "+3.5% 최우수")
         m2.metric("공인 정형 데이터 비율", f"{academic_ratio}.0%", "할루시네이션 원천 차단")
-        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "최신순 누적 중")
+        m3.metric("검증 완료 출처", f"{len(st.session_state.sources_data)}개", "최신순 정렬 완료")
 
         st.markdown("---")
 
@@ -785,9 +774,9 @@ if st.session_state.report_data:
             st.markdown("#### 🧹 범용 하이브리드 필터링 리포트")
             with st.container(border=True):
                 st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
-                st.markdown(f"**차단된 편향/스팸/과거 노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**차단된 편향/스팸/노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
                 st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
-                st.info("💡 과거 시점 자료를 자동 추려내고 최신성(Recency) 조건을 만족하는 팩트 소스만 리포트에 반영합니다.")
+                st.info("💡 추출된 날짜 스코어(`date_score`)를 기준으로 내림차순 정렬하여 가장 최신 자료가 항상 #1 상단에 배치되도록 보정합니다.")
 
         with col_audit_2:
             st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
@@ -808,5 +797,5 @@ if st.session_state.report_data:
         st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
             st.markdown("✅ **범용 공인 데이터 우선 반영:** 어떤 질문이든 도메인에 맞는 정형 팩트가 리포트 수치의 기준점이 됩니다.")
-            st.markdown("✅ **시점 가중치 필터링(Recency Guard):** 기존 수집 소스보다 이전 시점의 오래된 데이터는 자동 배제하여 최신성을 유지합니다.")
+            st.markdown("✅ **타임스탬프 기반 최신순 정렬 (Recency Sorting):** 추출된 날짜 스코어 기준으로 정렬하여 최신 기사가 상단에 고정됩니다.")
             st.markdown("✅ **원문 검증 미리보기 모달 지원:** 근거 자료 카드마다 미리보기 모달을 제공하여 사용자가 직접 원문을 확인할 수 있습니다.")
