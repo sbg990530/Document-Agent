@@ -18,10 +18,16 @@
 ## 주요 기능 및 아키텍처(Key Features)
 ```mermaid
 graph TD
-    A[사용자 자연어 질의] --> B[Planner Node: 질의 의도 분석 및 공인 데이터 라우팅]
-    B --> C[Search & Filter Node: 웹 검색 및 보안/가비지 필터링]
-    C --> D[Synthesizer Node: 최신순 정렬 및 리포트 합성]
-    D --> E[Streamlit 대시보드 및 3-Tab UI 출력]
+    classDef userStyle fill:#FFE4E1,stroke:#FF69B4,stroke-width:2px,color:#000;
+    classDef plannerStyle fill:#E0F7FA,stroke:#00ACC1,stroke-width:2px,color:#000;
+    classDef filterStyle fill:#E8F5E9,stroke:#43A047,stroke-width:2px,color:#000;
+    classDef synthStyle fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#000;
+    classDef uiStyle fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px,color:#000;
+
+    A[👤 사용자 자연어 질의]:::userStyle --> B[🧠 Planner Node <br/> 질의 의도 분석 및 공인 데이터 라우팅]:::plannerStyle
+    B --> C[🛡️ Search & Filter Node <br/> 웹 검색 및 보안/가비지 필터링]:::filterStyle
+    C --> D[📅 Synthesizer Node <br/> 최신순 정렬 및 리포트 합성]:::synthStyle
+    D --> E[📊 Streamlit 대시보드 <br/> 3-Tab UI 출력]:::uiStyle
 ```
 * **범용 공인 데이터 API 다중 라우팅(`Planner Node`) :** 사용자의 질의 의도 및 시점 분석, 정형 통계 데이터 기반 리포트 신뢰도 수치 상승효과
 * **철저한 보안 및 노이즈 차단 아키텍처(`Search & Filter Node`) :** 유튜브 및 커뮤니티 도메인 배제, 가비지 데이터 필터링, 개인정보 보호
