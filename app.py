@@ -728,7 +728,6 @@ if st.session_state.report_data:
         with col_t2:
             if st.button("🔄 최신 데이터 라이브 갱신", use_container_width=True):
                 with st.spinner("📡 현재 시점 최신 자료를 누적 수집하고 리포트를 재작성하는 중..."):
-                    # 💡 라이브 갱신 시 파이프라인 전체를 다시 태워 리포트와 소스를 동시 갱신
                     run_docuscout_pipeline(st.session_state.current_user_query, is_live_refresh=True)
                     st.success("✨ 최신 데이터 수집 및 리포트 재작성이 완료되었습니다!")
                     time.sleep(0.8)
@@ -790,5 +789,5 @@ if st.session_state.report_data:
         st.markdown("---")
         st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
-            st.markdown("✅ **범용 공인 데이터 우선 반영:** 어떤 질문이든 도메인에 맞는 정형 팩트가 리포트 수치의 기준점이 됩니다.")
-            st.markdown("✅ **원문 검증 미리보기 모달 지원:** 근거 자료 카드마다 미리보기 모달을 제공하여 사용자가 직접 원문을 확인할 수 있습니다.")
+            st.markdown("✅ **범용 공인 데이터 우선 반영:** 어떤 질문이든 도메인에 맞는 정형 팩트가 리포트 수치의 기준점이 되어 AI의 환각(Hallucination) 현상을 원천 차단합니다.")
+            st.markdown("✅ **원문 검증 미리보기 모달 지원:** 모든 출처 카드는 원문 상세보기를 통해 신뢰도를 즉시 확인할 수 있습니다.")
