@@ -349,12 +349,14 @@ def create_docuscout_graph():
     def search_node(state: AgentState):
         clean_keyword = state["search_keyword"]
         
+        # 🛡️ Tavily 검색 시 유튜브 및 비즈니스/소셜 노이즈 도메인 원천 차단
         search_response = tavily_client.search(
             query=clean_keyword,
             search_depth="advanced",
             topic="general",
             max_results=20,
             exclude_domains=[
+                "youtube.com", "youtu.be",  # 👈 유튜브 검색 결과 배제
                 "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki",
                 "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
                 "facebook.com", "instagram.com", "twitter.com", "x.com"
@@ -362,7 +364,9 @@ def create_docuscout_graph():
         )
         raw_sources = search_response.get('results', [])
         
+        # 🛡️ 파이썬 레벨 URL 블랙리스트 2차 강제 차단 (모바일 서브도메인 포함)
         blocked_keywords = [
+            "youtube.com", "youtu.be",  # 👈 유튜브 링크 철저 차단
             "facebook.com", "instagram.com", "blog.naver.com", 
             "naver.com/blog", "twitter.com", "x.com", 
             "dcinside.com", "fmkorea.com", "ruliweb.com", "namu.wiki",
@@ -774,9 +778,9 @@ if st.session_state.report_data:
             st.markdown("#### 🧹 범용 하이브리드 필터링 리포트")
             with st.container(border=True):
                 st.markdown(f"**총 탐색된 원본 웹 문서:** {st.session_state.raw_fetched_count}건")
-                st.markdown(f"**차단된 편향/스팸/노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
+                st.markdown(f"**차단된 편향/스팸/유튜브/노이즈:** <span style='color:#dc2626; font-weight:bold;'>{st.session_state.noise_filtered_count}건</span>", unsafe_allow_html=True)
                 st.markdown(f"**최종 엄선된 객관적 팩트 소스:** <span style='color:#059669; font-weight:bold;'>{len(st.session_state.sources_data)}건</span>", unsafe_allow_html=True)
-                st.info("💡 추출된 날짜 스코어(`date_score`)를 기준으로 내림차순 정렬하여 가장 최신 자료가 항상 #1 상단에 배치되도록 보정합니다.")
+                st.info("💡 유튜브 및 동영상 매체를 원천 배제하고, 공식 웹 문서와 뉴스 팩트만을 최신순으로 엄선합니다.")
 
         with col_audit_2:
             st.markdown("#### 📊 출처 도메인 신뢰도 등급 분포")
@@ -789,13 +793,13 @@ if st.session_state.report_data:
                 st.progress(news_ratio / 100)
                 st.caption(f"비중: {news_ratio}% (배경 맥락 보완)")
 
-                st.markdown("**Tier 3 (일반 웹 아티클 및 커뮤니티)**")
+                st.markdown("**Tier 3 (일반 웹 아티클 및 유튜브/커뮤니티)**")
                 st.progress(0.0)
                 st.caption("비중: 0% (배제됨)")
 
         st.markdown("---")
         st.markdown("#### 🔍 교차 검증 및 할루시네이션 방지 가드")
         with st.container(border=True):
-            st.markdown("✅ **범용 공인 데이터 우선 반영:** 어떤 질문이든 도메인에 맞는 정형 팩트가 리포트 수치의 기준점이 됩니다.")
+            st.markdown("✅ **유튜브 및 소셜 미디어 원천 차단:** 동영상 및 익명 커뮤니티 링크는 검색 및 수집 단계에서 완전히 배제됩니다.")
             st.markdown("✅ **타임스탬프 기반 최신순 정렬 (Recency Sorting):** 추출된 날짜 스코어 기준으로 정렬하여 최신 기사가 상단에 고정됩니다.")
             st.markdown("✅ **원문 검증 미리보기 모달 지원:** 근거 자료 카드마다 미리보기 모달을 제공하여 사용자가 직접 원문을 확인할 수 있습니다.")
