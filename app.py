@@ -359,7 +359,8 @@ def create_docuscout_graph():
                 "dcinside.com", "fmkorea.com", "ruliweb.com", "blog.naver.com", "namu.wiki",
                 "ppomppu.co.kr", "theqoo.net", "instiz.net", "kin.naver.com",
                 "facebook.com", "instagram.com", "twitter.com", "x.com",
-                "youtube.com", "youtu.be"
+                "youtube.com", "youtu.be", "blog.daum.net", "tistory.com", "brunch.co.kr", 
+                "wikipedia.org", "clien.net", "bobaedream.co.kr"
             ]
         )
         raw_sources = search_response.get('results', [])
