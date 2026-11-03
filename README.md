@@ -51,7 +51,50 @@ graph LR
   * **세션 복원 :** 좌측 사이드바를 통해 이전 검색 기록을 유지하고 원클릭으로 세션을 복원할 수 있는 편의성 제공
 ---
 ## 4. 시연 영상(Screenshots / Demo)
+## 🎬 시연 영상 및 사용법 (Demo & Usage)
 
+### 1. 🎯 질의어 입력 및 AI 에이전트 구동
+사용자가 분석하고자 하는 질문을 입력하면 LangGraph 에이전트가 타겟팅 키워드를 추출하고 탐색 파이프라인을 실행합니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d4f4e021-950f-47a0-beb6-37e243770162" width="100%" alt="Search Start">
+</p>
+
+---
+
+### 2. 📋 AI 종합 리포트 결과 출력
+공인 정형 데이터를 1순위로 교차 검증하여 완성된 하이브리드 리포트와 신뢰도 요약 지표를 한눈에 확인할 수 있습니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d3aede1b-8424-4ca5-b673-70657832417d" width="100%" alt="Report Dashboard">
+</p>
+
+---
+
+### 3. 🔍 검증 출처 원문 미리보기 모달
+리포트 하단의 근거 출처 카드를 클릭하면 원문 스니펫과 URL을 모달 팝업으로 띄워 팩트를 직접 검증할 수 있습니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/30b3c0ad-ffcf-4d0e-8f6c-f08d41c05f4c" width="100%" alt="Source Modal">
+</p>
+
+---
+
+### 4. 🔄 실시간 라이브 데이터 갱신
+`실시간 라이브 탐색` 탭에서 최신 자료를 누적 수집하고 에이전트의 구동 타임라인 로그를 투명하게 모니터링합니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/b1ba0657-9057-4b00-815a-0637f46b0600" width="100%" alt="Live Refresh">
+</p>
+
+---
+
+### 5. 📜 사이드바 검색 히스토리 및 세션 복원
+이전에 진행했던 리서치 기록을 사이드바 히스토리 목록에서 클릭 한 번으로 순식간에 복원하여 재확인할 수 있습니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7ee770f3-bee6-45f6-a885-b4df02e6e542" width="100%" alt="History Restore">
+</p>
 
 ---
 ## 5. 기대 효과 및 성과
