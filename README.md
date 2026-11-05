@@ -7,7 +7,7 @@
   </a>
 </p>
 
-> **🌐 웹사이트 바로가기**: [DocuScout 라이브 서비스 접속하기](https://document-agent-ogmmhiwtxsmnrctydt.streamlit.app)
+> **🌐 웹사이트 바로가기**: [DocuScout 서비스 접속하기](https://document-agent-n5zmmkztuwhsorzectajdt.streamlit.app/)
 ---
 ## 1. 프로젝트 개요(Overview)
 ### ◆ 개발 배경
