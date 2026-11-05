@@ -1,6 +1,14 @@
 # 자연어 요청 기반 데이터 수집 및 리포팅 AI 에이전트
 > **"정보 과부하 시대"** 신뢰할 수 있는 팩트와 근거에 기반하여 고품질 데이터 수집 및 분석하여 리포트를 자동 생성하는 지능형 업무 자동화 에이전트
 ---
+<p align="left">
+  <a href="https://document-agent-ogmmhiwtxsmnrctydt.streamlit.app" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-바로가기-6C63FF?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo">
+  </a>
+</p>
+
+> **🌐 웹사이트 바로가기**: [DocuScout 라이브 서비스 접속하기](https://document-agent-ogmmhiwtxsmnrctydt.streamlit.app)
+---
 ## 1. 프로젝트 개요(Overview)
 ### ◆ 개발 배경
 * **정보 신뢰성 저하 :** 기업 및 기관의 보고서 및 기획안 작성 업무 과정에서 발생하는 과도한 정보 탐색 시간과 주관적 정보 범람 문제 해결
